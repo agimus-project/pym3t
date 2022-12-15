@@ -5,6 +5,8 @@
 #include <pybind11/eigen.h>
 #include <pybind11/chrono.h>
 
+// #include <pybind11/stl.h>
+
 #include <icg/common.h>
 #include <icg/camera.h>
 #include <icg/realsense_camera.h>
@@ -26,55 +28,91 @@ using namespace pybind11::literals;
 using namespace icg;
 
 PYBIND11_MODULE(_pyicg_mod, m) {
-    // Constructor and setup method
+
+    ///////////////////////
+    // Implicit conversions
+    // See:
+    // https://pybind11.readthedocs.io/en/stable/advanced/classes.html?highlight=implicitly_convertible#implicit-conversions
+    // https://stackoverflow.com/questions/56009999/python-bindings-using-pybind11-with-stdfilesystem-as-function-argument-giving
+    ///////////////////////
+    py::class_<std::filesystem::path>(m, "Path")
+        .def(py::init<std::string>())
+        .def("__repr__",
+            [](const std::filesystem::path &p) {
+                return "std::filesystem::path: " + p.string();
+            })
+        ;
+    //py::implicitly_convertible<convert_from, convert_to>
+    py::implicitly_convertible<std::string, std::filesystem::path>();
+
+    /*
+    // In Eigen C++ code, there is a full read-write access to the internal matrix so conversion is easy (with copy) 
+    Transform3fA t;
+    Matrix4d m = t.matrix();
+    t.matrix() = m
+    **/
+    // py::class_<Transform3fA>(m, "Transform3fA")
+    //     .def(py::init<Transform3fA>());
+    // py::implicitly_convertible<Transform3fA, Eigen::Matrix4f>();
+    // Error: ImportError: implicitly_convertible: Unable to find type Eigen::Matrix<float, 4, 4, 0, 4, 4>
+    // From issue:
+    // Implicit conversions from A to B only work when B is a custom data type that is exposed to Python via pybind11.
+
+
+    ///////////////////////
+    // Classes
+    ///////////////////////
+
     py::class_<Tracker>(m, "Tracker")
         .def(py::init<const std::string, int, int, bool, 
                       const std::chrono::milliseconds&, int, int>(), 
                       "name"_a, "n_corr_iterations"_a=5, "n_update_iterations"_a=2, "synchronize_cameras"_a=true, 
                       "cycle_duration"_a=std::chrono::milliseconds{33}, "visualization_time"_a=0, "viewer_time"_a=1)
-        .def("SetUp", &Tracker::SetUp);
+        .def("SetUp", &Tracker::SetUp)
+        ;
 
-    //////////////////////////////////////
-    //////////////////////////////////////
-    // TODO
-    //////////////////////////////////////
-    //////////////////////////////////////
 
     // RendererGeometry
     py::class_<icg::RendererGeometry>(m, "RendererGeometry")
-        .def(py::init<const std::string &>(), "name"_a);
+        .def(py::init<const std::string &>(), "name"_a)
+        ;
     
     // TODO: Somehow read the flag USE_REALSENSE to decide whether or not to create bindings
     // RealSenseColorCamera
     py::class_<icg::RealSenseColorCamera>(m, "RealSenseColorCamera")
-        .def(py::init<const std::string &, bool>(), "name"_a, "use_depth_as_world_frame"_a=false);
+        .def(py::init<const std::string &, bool>(), "name"_a, "use_depth_as_world_frame"_a=false)
+        ;
 
     // RealSenseDepthCamera
     py::class_<icg::RealSenseDepthCamera>(m, "RealSenseDepthCamera")
-        .def(py::init<const std::string &, bool>(), "name"_a, "use_color_as_world_frame"_a=true);
+        .def(py::init<const std::string &, bool>(), "name"_a, "use_color_as_world_frame"_a=true)
+        ;
 
     // NormalColorViewer
     py::class_<NormalColorViewer>(m, "NormalColorViewer")
         .def(py::init<const std::string &, const std::shared_ptr<ColorCamera> &, const std::shared_ptr<RendererGeometry> &, float>(),
-                      "name"_a, "color_camera_ptr"_a, "renderer_geometry_ptr"_a, "opacity"_a=0.5f);
+                      "name"_a, "color_camera_ptr"_a, "renderer_geometry_ptr"_a, "opacity"_a=0.5f)
+        ;
 
     // NormalDepthViewer
     py::class_<NormalDepthViewer>(m, "NormalDepthViewer")
         .def(py::init<const std::string &, const std::shared_ptr<DepthCamera> &, const std::shared_ptr<RendererGeometry> &, float, float, float>(),
-                      "name"_a, "depth_camera_ptr"_a, "renderer_geometry_ptr"_a, "min_depth"_a=0.0f, "max_depth"_a=1.0f, "opacity"_a=0.5f);
+                      "name"_a, "depth_camera_ptr"_a, "renderer_geometry_ptr"_a, "min_depth"_a=0.0f, "max_depth"_a=1.0f, "opacity"_a=0.5f)
+        ;
 
-    // FocusedBasicDepthRenderer -> NEED A WRAPPER FOR Transform3fA??
-    // 
+    // FocusedBasicDepthRenderer -> Wrapper for Transform3fA
     py::class_<FocusedBasicDepthRenderer>(m, "FocusedBasicDepthRenderer")
         .def(py::init<const std::string &, const std::shared_ptr<RendererGeometry> &, const Transform3fA &, const Intrinsics &, int, float, float>(),
                       "name"_a, "renderer_geometry_ptr"_a, "world2camera_pose"_a, "intrinsics"_a, "image_size"_a=200, "z_min"_a=0.01f, "z_max"_a=5.0f)
         .def(py::init<const std::string &, const std::shared_ptr<RendererGeometry> &, const std::shared_ptr<Camera> &, int, float, float>(),
-                      "name"_a, "renderer_geometry_ptr"_a, "camera_ptr"_a, "image_size"_a=200, "z_min"_a=0.01f, "z_max"_a=5.0f);
-
-    // Body
+                      "name"_a, "renderer_geometry_ptr"_a, "camera_ptr"_a, "image_size"_a=200, "z_min"_a=0.01f, "z_max"_a=5.0f)
+        ;
+    
+    // Body  -> wrapper
     py::class_<Body>(m, "Body")
         .def(py::init<const std::string &, const std::filesystem::path &, float, bool, bool, const Transform3fA &, uchar>(),
-                      "name"_a, "geometry_path"_a, "geometry_unit_in_meter"_a, "geometry_counterclockwise"_a, "geometry_enable_culling"_a, "geometry2body_pose"_a, "silhouette_id"_a=0);
+                      "name"_a, "geometry_path"_a, "geometry_unit_in_meter"_a, "geometry_counterclockwise"_a, "geometry_enable_culling"_a, "geometry2body_pose"_a, "silhouette_id"_a=0)
+        ;
 
     // StaticDetector
     py::class_<StaticDetector>(m, "StaticDetector")
@@ -87,25 +125,29 @@ PYBIND11_MODULE(_pyicg_mod, m) {
         .def(py::init<const std::string &, const std::shared_ptr<Body> &, const std::filesystem::path &, 
                       float, int, int, float, float, bool, int>(),
                       "name"_a, "body_ptr"_a, "model_path"_a, 
-                      "sphere_radius"_a=0.8f, "n_divides"_a=4, "n_points"_a=200, "max_radius_depth_offset"_a=0.05f, "stride_depth_offset"_a=0.002f, "use_random_seed"_a=false, "image_size"_a=2000);
+                      "sphere_radius"_a=0.8f, "n_divides"_a=4, "n_points"_a=200, "max_radius_depth_offset"_a=0.05f, "stride_depth_offset"_a=0.002f, "use_random_seed"_a=false, "image_size"_a=2000)
+        ;
 
     // DepthModel
     py::class_<DepthModel>(m, "DepthModel")
         .def(py::init<const std::string &, const std::shared_ptr<Body> &, const std::filesystem::path &, 
                       float, int, int, float, float, bool, int>(),
                       "name"_a, "body_ptr"_a, "model_path"_a, 
-                      "sphere_radius"_a=0.8f, "n_divides"_a=4, "n_points"_a=200, "max_radius_depth_offset"_a=0.05f, "stride_depth_offset"_a=0.002f, "use_random_seed"_a=false, "image_size"_a=2000);
+                      "sphere_radius"_a=0.8f, "n_divides"_a=4, "n_points"_a=200, "max_radius_depth_offset"_a=0.05f, "stride_depth_offset"_a=0.002f, "use_random_seed"_a=false, "image_size"_a=2000)
+        ;
 
     // RegionModality (because of RegionModel)
     py::class_<RegionModality>(m, "RegionModality")
         .def(py::init<const std::string &, const std::shared_ptr<Body> &, const std::shared_ptr<ColorCamera> &, const std::shared_ptr<RegionModel> &>(),
-                      "name"_a, "body_ptr"_a, "color_camera_ptr"_a, "region_model_ptr"_a);
+                      "name"_a, "body_ptr"_a, "color_camera_ptr"_a, "region_model_ptr"_a)
+        ;
 
 
     // DepthModality (because of DepthModel)
     py::class_<DepthModality>(m, "DepthModality")
         .def(py::init<const std::string &, const std::shared_ptr<Body> &, const std::shared_ptr<DepthCamera> &, const std::shared_ptr<DepthModel> &>(),
-                      "name"_a, "body_ptr"_a, "depth_camera_ptr"_a, "depth_model_ptr"_a);
+                      "name"_a, "body_ptr"_a, "depth_camera_ptr"_a, "depth_model_ptr"_a)
+        ;
 
     // Optimizer
     py::class_<Optimizer>(m, "Optimizer")
