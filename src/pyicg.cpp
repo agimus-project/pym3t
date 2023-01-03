@@ -59,7 +59,6 @@ PYBIND11_MODULE(_pyicg_mod, m) {
         .def("SetUp", &Tracker::SetUp)
         ;
 
-
     // RendererGeometry
     py::class_<icg::RendererGeometry>(m, "RendererGeometry")
         .def(py::init<const std::string &>(), "name"_a)
@@ -88,37 +87,14 @@ PYBIND11_MODULE(_pyicg_mod, m) {
                       "name"_a, "depth_camera_ptr"_a, "renderer_geometry_ptr"_a, "min_depth"_a=0.0f, "max_depth"_a=1.0f, "opacity"_a=0.5f)
         ;
 
-
-
-    // py::class_<FocusedBasicDepthRenderer>(m, "FocusedBasicDepthRenderer")
-    //     // .def(py::init<const std::string &, const std::shared_ptr<RendererGeometry> &, const Transform3fA &, const Intrinsics &, int, float, float>(),
-    //     //               "name"_a, "renderer_geometry_ptr"_a, "world2camera_pose"_a, "intrinsics"_a, "image_size"_a=200, "z_min"_a=0.01f, "z_max"_a=5.0f)
-    //     /*
-    //     Not possible for several reasons:
-    //     Main compilation error: error: static assertion failed: pybind11::init() return-by-value factory function requires a movable class
-        
-    //     This is likely because FocusedBasicDepthRenderer is not moveable, it does not define an (implicit) move constructor:
-    //     - Chain of inheritance in our case FocusedBasicDepthRenderer->FocusedRenderer->Renderer and Renderer has a mutex as an attribute. A mutex is not moveable
-    //     by nature and hence Renderer cannot have a default move constructor
-    //     - has a BasicDepthRendererCore attribute which has declaration/definition of its desctructor -> it's move constructor is not declared by the compilator
-    //     and hence FocusedBasicDepthRenderer has no move constructor
-
-    //     Source: https://www.slideshare.net/ripplelabs/howard-hinnant-accu2014 
-    //     */
-    //     // .def(py::init(&create_FocusedBasicDepthRenderer),
-    //     //               "name"_a, "renderer_geometry_ptr"_a, "world2camera_pose"_a, "intrinsics"_a, "image_size"_a=200, "z_min"_a=0.01f, "z_max"_a=5.0f)
-        
-    //     // Try to return a smart pointer instead?
-    //     .def(py::init([](const std::string &name, const std::shared_ptr<RendererGeometry> &renderer_geometry_ptr, const Matrix4f &world2camera_pose, const Intrinsics &intrinsics, int image_size, float z_min, float z_max) {
-    //         Transform3fA world2camera_pose_t;
-    //         world2camera_pose_t.matrix() = world2camera_pose;
-    //         return std::unique_ptr<FocusedBasicDepthRenderer>(new FocusedBasicDepthRenderer(name, renderer_geometry_ptr, world2camera_pose_t, intrinsics, image_size, z_min, z_max));
-    //     }))
-    //     // .def(py::init<const std::string &, const std::shared_ptr<RendererGeometry> &, const std::shared_ptr<Camera> &, int, float, float>(),
-    //     //               "name"_a, "renderer_geometry_ptr"_a, "camera_ptr"_a, "image_size"_a=200, "z_min"_a=0.01f, "z_max"_a=5.0f)
-    //     ;
+    py::class_<FocusedBasicDepthRenderer>(m, "FocusedBasicDepthRenderer")
+        .def(py::init<const std::string &, const std::shared_ptr<RendererGeometry> &, const Transform3fA &, const Intrinsics &, int, float, float>(),
+                      "name"_a, "renderer_geometry_ptr"_a, "world2camera_pose"_a, "intrinsics"_a, "image_size"_a=200, "z_min"_a=0.01f, "z_max"_a=5.0f)       
+        .def(py::init<const std::string &, const std::shared_ptr<RendererGeometry> &, const std::shared_ptr<Camera> &, int, float, float>(),
+                      "name"_a, "renderer_geometry_ptr"_a, "camera_ptr"_a, "image_size"_a=200, "z_min"_a=0.01f, "z_max"_a=5.0f)
+        ;
     
-    // Body  -> wrapper
+    // Body
     py::class_<Body>(m, "Body")
         .def(py::init<const std::string &, const std::filesystem::path &>(), "name"_a, "geometry_path"_a)
         .def(py::init<const std::string &, const std::filesystem::path &, float, bool, bool, const Transform3fA &, uchar>(),
