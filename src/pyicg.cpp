@@ -5,8 +5,6 @@
 #include <pybind11/eigen.h>
 #include <pybind11/chrono.h>
 
-// #include <pybind11/stl.h>
-
 #include <icg/common.h>
 #include <icg/camera.h>
 #include <icg/realsense_camera.h>
@@ -22,10 +20,14 @@
 #include <icg/static_detector.h>
 #include <icg/tracker.h>
 
+#include "pyicg/type_caster_utils.h"
+
 namespace py = pybind11;
 // to be able to use "arg"_a shorthand
 using namespace pybind11::literals;
 using namespace icg;
+using namespace Eigen;
+
 
 PYBIND11_MODULE(_pyicg_mod, m) {
 
@@ -42,22 +44,8 @@ PYBIND11_MODULE(_pyicg_mod, m) {
                 return "std::filesystem::path: " + p.string();
             })
         ;
-    //py::implicitly_convertible<convert_from, convert_to>
+    // py::implicitly_convertible<convert_from, convert_to>
     py::implicitly_convertible<std::string, std::filesystem::path>();
-
-    /*
-    // In Eigen C++ code, there is a full read-write access to the internal matrix so conversion is easy (with copy) 
-    Transform3fA t;
-    Matrix4d m = t.matrix();
-    t.matrix() = m
-    **/
-    // py::class_<Transform3fA>(m, "Transform3fA")
-    //     .def(py::init<Transform3fA>());
-    // py::implicitly_convertible<Transform3fA, Eigen::Matrix4f>();
-    // Error: ImportError: implicitly_convertible: Unable to find type Eigen::Matrix<float, 4, 4, 0, 4, 4>
-    // From issue:
-    // Implicit conversions from A to B only work when B is a custom data type that is exposed to Python via pybind11.
-
 
     ///////////////////////
     // Classes
@@ -100,18 +88,43 @@ PYBIND11_MODULE(_pyicg_mod, m) {
                       "name"_a, "depth_camera_ptr"_a, "renderer_geometry_ptr"_a, "min_depth"_a=0.0f, "max_depth"_a=1.0f, "opacity"_a=0.5f)
         ;
 
-    // FocusedBasicDepthRenderer -> Wrapper for Transform3fA
-    py::class_<FocusedBasicDepthRenderer>(m, "FocusedBasicDepthRenderer")
-        .def(py::init<const std::string &, const std::shared_ptr<RendererGeometry> &, const Transform3fA &, const Intrinsics &, int, float, float>(),
-                      "name"_a, "renderer_geometry_ptr"_a, "world2camera_pose"_a, "intrinsics"_a, "image_size"_a=200, "z_min"_a=0.01f, "z_max"_a=5.0f)
-        .def(py::init<const std::string &, const std::shared_ptr<RendererGeometry> &, const std::shared_ptr<Camera> &, int, float, float>(),
-                      "name"_a, "renderer_geometry_ptr"_a, "camera_ptr"_a, "image_size"_a=200, "z_min"_a=0.01f, "z_max"_a=5.0f)
-        ;
+
+
+    // py::class_<FocusedBasicDepthRenderer>(m, "FocusedBasicDepthRenderer")
+    //     // .def(py::init<const std::string &, const std::shared_ptr<RendererGeometry> &, const Transform3fA &, const Intrinsics &, int, float, float>(),
+    //     //               "name"_a, "renderer_geometry_ptr"_a, "world2camera_pose"_a, "intrinsics"_a, "image_size"_a=200, "z_min"_a=0.01f, "z_max"_a=5.0f)
+    //     /*
+    //     Not possible for several reasons:
+    //     Main compilation error: error: static assertion failed: pybind11::init() return-by-value factory function requires a movable class
+        
+    //     This is likely because FocusedBasicDepthRenderer is not moveable, it does not define an (implicit) move constructor:
+    //     - Chain of inheritance in our case FocusedBasicDepthRenderer->FocusedRenderer->Renderer and Renderer has a mutex as an attribute. A mutex is not moveable
+    //     by nature and hence Renderer cannot have a default move constructor
+    //     - has a BasicDepthRendererCore attribute which has declaration/definition of its desctructor -> it's move constructor is not declared by the compilator
+    //     and hence FocusedBasicDepthRenderer has no move constructor
+
+    //     Source: https://www.slideshare.net/ripplelabs/howard-hinnant-accu2014 
+    //     */
+    //     // .def(py::init(&create_FocusedBasicDepthRenderer),
+    //     //               "name"_a, "renderer_geometry_ptr"_a, "world2camera_pose"_a, "intrinsics"_a, "image_size"_a=200, "z_min"_a=0.01f, "z_max"_a=5.0f)
+        
+    //     // Try to return a smart pointer instead?
+    //     .def(py::init([](const std::string &name, const std::shared_ptr<RendererGeometry> &renderer_geometry_ptr, const Matrix4f &world2camera_pose, const Intrinsics &intrinsics, int image_size, float z_min, float z_max) {
+    //         Transform3fA world2camera_pose_t;
+    //         world2camera_pose_t.matrix() = world2camera_pose;
+    //         return std::unique_ptr<FocusedBasicDepthRenderer>(new FocusedBasicDepthRenderer(name, renderer_geometry_ptr, world2camera_pose_t, intrinsics, image_size, z_min, z_max));
+    //     }))
+    //     // .def(py::init<const std::string &, const std::shared_ptr<RendererGeometry> &, const std::shared_ptr<Camera> &, int, float, float>(),
+    //     //               "name"_a, "renderer_geometry_ptr"_a, "camera_ptr"_a, "image_size"_a=200, "z_min"_a=0.01f, "z_max"_a=5.0f)
+    //     ;
     
     // Body  -> wrapper
     py::class_<Body>(m, "Body")
+        .def(py::init<const std::string &, const std::filesystem::path &>(), "name"_a, "geometry_path"_a)
         .def(py::init<const std::string &, const std::filesystem::path &, float, bool, bool, const Transform3fA &, uchar>(),
                       "name"_a, "geometry_path"_a, "geometry_unit_in_meter"_a, "geometry_counterclockwise"_a, "geometry_enable_culling"_a, "geometry2body_pose"_a, "silhouette_id"_a=0)
+        .def_property("body2world_pose", &Body::body2world_pose, &Body::set_body2world_pose)
+        .def_property("world2body_pose", &Body::world2body_pose, &Body::set_world2body_pose)
         ;
 
     // StaticDetector
@@ -153,6 +166,8 @@ PYBIND11_MODULE(_pyicg_mod, m) {
     py::class_<Optimizer>(m, "Optimizer")
         .def(py::init<const std::string &, float, float>(),
                       "name"_a, "tikhonov_parameter_rotation"_a=1000.0f, "tikhonov_parameter_translation"_a=30000.0f)
+        .def(py::init<const std::string &, const std::filesystem::path &>(),
+                      "name"_a, "metafile_path"_a)
         .def_property("name", &Optimizer::name, &Optimizer::set_name)
         .def_property("metafile_path", &Optimizer::metafile_path, &Optimizer::set_metafile_path)
         .def_property("tikhonov_parameter_rotation", &Optimizer::tikhonov_parameter_rotation, &Optimizer::set_tikhonov_parameter_rotation)

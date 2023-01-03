@@ -15,5 +15,6 @@ pybind11_add_module(_pyicg_mod MODULE src/pyicg.cpp)
 
 target_link_libraries(_pyicg_mod PUBLIC icg)
 target_compile_features(_pyicg_mod PUBLIC cxx_std_17)
+target_include_directories(_pyicg_mod PUBLIC include)
 
 install(TARGETS _pyicg_mod DESTINATION pyicg)
