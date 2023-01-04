@@ -53,8 +53,8 @@ PYBIND11_MODULE(_pyicg_mod, m) {
                       const std::chrono::milliseconds&, int, int>(), 
                       "name"_a, "n_corr_iterations"_a=5, "n_update_iterations"_a=2, "synchronize_cameras"_a=true, 
                       "cycle_duration"_a=std::chrono::milliseconds{33}, "visualization_time"_a=0, "viewer_time"_a=1)
-        .def("SetUp", &Tracker::SetUp)
-        .def("RunTrackerProcess", &Tracker::RunTrackerProcess)
+        .def("SetUp", &Tracker::SetUp, "set_up_all_objects"_a=true)
+        .def("RunTrackerProcess", &Tracker::RunTrackerProcess, "execute_detection"_a=true, "start_tracking"_a=true)
         .def("AddViewer", &Tracker::AddViewer)
         .def("AddDetector", &Tracker::AddDetector)
         .def("AddOptimizer", &Tracker::AddOptimizer)
@@ -83,7 +83,9 @@ PYBIND11_MODULE(_pyicg_mod, m) {
     };
 
     // Camera -> not constructible, just to be able to bind RealSenseColorCamera and enable automatic downcasting
-    py::class_<icg::Camera, PyCamera, std::shared_ptr<icg::Camera>>(m, "Camera");
+    py::class_<icg::Camera, PyCamera, std::shared_ptr<icg::Camera>>(m, "Camera")
+        .def("SetUp", &icg::Camera::SetUp)
+        ;
 
     // ColorCamera -> not constructible, just to be able to bind RealSenseColorCamera
     py::class_<icg::ColorCamera, icg::Camera, std::shared_ptr<icg::ColorCamera>>(m, "ColorCamera");
