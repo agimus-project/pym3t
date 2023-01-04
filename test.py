@@ -1,11 +1,11 @@
 import numpy as np
-from pyicg import *
+import pyicg
 
-t = Tracker('tracker')
+t = pyicg.Tracker('tracker')
 t.SetUp(True)
 
-opt = Optimizer('optimizer')
-opt = Optimizer('optimizer', 'optimizer_path')
+opt = pyicg.Optimizer('optimizer')
+opt = pyicg.Optimizer('optimizer', 'optimizer_path')
 opt.name = 'Yop'
 opt.metafile_path = 'Yep'
 opt.tikhonov_parameter_rotation = 0.5
@@ -17,8 +17,8 @@ print(opt.tikhonov_parameter_rotation)
 print(opt.tikhonov_parameter_translation)
 
 T_w_b = np.eye(4)
-body = Body(name='body_name', geometry_path='body_path')
-# body = Body(name='toto', 
+body = pyicg.Body(name='body_name', geometry_path='body_path')
+# body = pyicg.Body(name='toto', 
 #             geometry_path='toto_path', 
 #             geometry_unit_in_meter=1.0, 
 #             geometry_counterclockwise=True, 

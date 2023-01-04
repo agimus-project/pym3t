@@ -1,10 +1,16 @@
+// EIGEN
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 
+// PYBIND11
+// core
 #include <pybind11/pybind11.h>
+// implicit type conversions
 #include <pybind11/eigen.h>
 #include <pybind11/chrono.h>
+#include <pybind11/stl/filesystem.h>
 
+// ICG
 #include <icg/common.h>
 #include <icg/camera.h>
 #include <icg/realsense_camera.h>
@@ -20,6 +26,7 @@
 #include <icg/static_detector.h>
 #include <icg/tracker.h>
 
+// PYICG
 #include "pyicg/type_caster_utils.h"
 
 namespace py = pybind11;
@@ -28,24 +35,14 @@ using namespace pybind11::literals;
 using namespace icg;
 using namespace Eigen;
 
+/**
+ * TODO: 
+ * - Read the flag USE_REALSENSE to decide whether or not to create bindings
+ * */ 
+
+
 
 PYBIND11_MODULE(_pyicg_mod, m) {
-
-    ///////////////////////
-    // Implicit conversions
-    // See:
-    // https://pybind11.readthedocs.io/en/stable/advanced/classes.html?highlight=implicitly_convertible#implicit-conversions
-    // https://stackoverflow.com/questions/56009999/python-bindings-using-pybind11-with-stdfilesystem-as-function-argument-giving
-    ///////////////////////
-    py::class_<std::filesystem::path>(m, "Path")
-        .def(py::init<std::string>())
-        .def("__repr__",
-            [](const std::filesystem::path &p) {
-                return "std::filesystem::path: " + p.string();
-            })
-        ;
-    // py::implicitly_convertible<convert_from, convert_to>
-    py::implicitly_convertible<std::string, std::filesystem::path>();
 
     ///////////////////////
     // Classes
@@ -57,21 +54,80 @@ PYBIND11_MODULE(_pyicg_mod, m) {
                       "name"_a, "n_corr_iterations"_a=5, "n_update_iterations"_a=2, "synchronize_cameras"_a=true, 
                       "cycle_duration"_a=std::chrono::milliseconds{33}, "visualization_time"_a=0, "viewer_time"_a=1)
         .def("SetUp", &Tracker::SetUp)
+        .def("AddViewer", &Tracker::AddViewer)
         ;
 
     // RendererGeometry
-    py::class_<icg::RendererGeometry>(m, "RendererGeometry")
+    py::class_<icg::RendererGeometry, std::shared_ptr<icg::RendererGeometry>>(m, "RendererGeometry")
         .def(py::init<const std::string &>(), "name"_a)
         ;
+
+
+    ///
+    class PyColorCamera: public icg::ColorCamera {
+        public:
+            // Inherit the base class constructor
+            using icg::ColorCamera::ColorCamera;
+
+            // Trampoline for SetUp
+            bool SetUp() override {
+                PYBIND11_OVERRIDE_PURE(
+                    bool,
+                    ColorCamera,
+                    SetUp
+                );
+            }
+
+            // Trampoline for SetUp
+            bool UpdateImage(bool synchronized) override {
+                PYBIND11_OVERRIDE_PURE(
+                    bool,
+                    ColorCamera,
+                    UpdateImage,
+                    synchronized
+                );
+            }
+    };
     
-    // TODO: Somehow read the flag USE_REALSENSE to decide whether or not to create bindings
+    // ColorCamera -> not constructible, just to be able to bind RealSenseColorCamera
+    py::class_<icg::ColorCamera, PyColorCamera, std::shared_ptr<icg::ColorCamera>>(m, "ColorCamera");
+
     // RealSenseColorCamera
-    py::class_<icg::RealSenseColorCamera>(m, "RealSenseColorCamera")
-        .def(py::init<const std::string &, bool>(), "name"_a, "use_depth_as_world_frame"_a=false)
+    py::class_<icg::RealSenseColorCamera, icg::ColorCamera, std::shared_ptr<icg::RealSenseColorCamera>>(m, "RealSenseColorCamera")
+        .def(py::init<const std::string &, bool>(), "name"_a, "use_color_as_world_frame"_a=true)
         ;
 
+    ///
+    class PyDepthCamera: public icg::DepthCamera {
+        public:
+            // Inherit the base class constructor
+            using icg::DepthCamera::DepthCamera;
+
+            // Trampoline for SetUp
+            bool SetUp() override {
+                PYBIND11_OVERRIDE_PURE(
+                    bool,
+                    DepthCamera,
+                    SetUp
+                );
+            }
+
+            // Trampoline for SetUp
+            bool UpdateImage(bool synchronized) override {
+                PYBIND11_OVERRIDE_PURE(
+                    bool,
+                    DepthCamera,
+                    UpdateImage,
+                    synchronized
+                );
+            }
+    };
+
+    // DepthCamera -> not constructible, just to be able to bind RealSenseDepthCamera
+    py::class_<icg::DepthCamera, PyDepthCamera, std::shared_ptr<icg::DepthCamera>>(m, "DepthCamera");
+
     // RealSenseDepthCamera
-    py::class_<icg::RealSenseDepthCamera>(m, "RealSenseDepthCamera")
+    py::class_<icg::RealSenseDepthCamera, icg::DepthCamera, std::shared_ptr<icg::RealSenseDepthCamera>>(m, "RealSenseDepthCamera")
         .def(py::init<const std::string &, bool>(), "name"_a, "use_color_as_world_frame"_a=true)
         ;
 
@@ -106,7 +162,8 @@ PYBIND11_MODULE(_pyicg_mod, m) {
     // StaticDetector
     py::class_<StaticDetector>(m, "StaticDetector")
         .def(py::init<const std::string &, const std::shared_ptr<Body> &, const Transform3fA &>(),
-                      "name"_a, "body_ptr"_a, "body2world_pose"_a);
+                      "name"_a, "body_ptr"_a, "body2world_pose"_a)
+        ;
  
 
     // RegionModel
@@ -149,18 +206,6 @@ PYBIND11_MODULE(_pyicg_mod, m) {
         .def_property("tikhonov_parameter_rotation", &Optimizer::tikhonov_parameter_rotation, &Optimizer::set_tikhonov_parameter_rotation)
         .def_property("tikhonov_parameter_translation", &Optimizer::tikhonov_parameter_translation, &Optimizer::set_tikhonov_parameter_translation)
         ;
-
-
-
-
-
-
-
-
-
-
-
-
 
 }   
 
