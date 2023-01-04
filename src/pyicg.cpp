@@ -64,88 +64,90 @@ PYBIND11_MODULE(_pyicg_mod, m) {
 
 
     ///
-    class PyColorCamera: public icg::ColorCamera {
+    class PyCamera: public icg::Camera {
         public:
             // Inherit the base class constructor
-            using icg::ColorCamera::ColorCamera;
+            using icg::Camera::Camera;
 
-            // Trampoline for SetUp
             bool SetUp() override {
                 PYBIND11_OVERRIDE_PURE(
                     bool,
-                    ColorCamera,
+                    Camera,
                     SetUp
                 );
             }
 
-            // Trampoline for SetUp
             bool UpdateImage(bool synchronized) override {
                 PYBIND11_OVERRIDE_PURE(
                     bool,
-                    ColorCamera,
+                    Camera,
                     UpdateImage,
                     synchronized
                 );
             }
     };
-    
+
+    // Camera -> not constructible, just to be able to bind RealSenseColorCamera and enable automatic downcasting
+    py::class_<icg::Camera, PyCamera, std::shared_ptr<icg::Camera>>(m, "Camera");
+
     // ColorCamera -> not constructible, just to be able to bind RealSenseColorCamera
-    py::class_<icg::ColorCamera, PyColorCamera, std::shared_ptr<icg::ColorCamera>>(m, "ColorCamera");
+    py::class_<icg::ColorCamera, icg::Camera, std::shared_ptr<icg::ColorCamera>>(m, "ColorCamera");
 
     // RealSenseColorCamera
     py::class_<icg::RealSenseColorCamera, icg::ColorCamera, std::shared_ptr<icg::RealSenseColorCamera>>(m, "RealSenseColorCamera")
         .def(py::init<const std::string &, bool>(), "name"_a, "use_color_as_world_frame"_a=true)
         ;
 
-    ///
-    class PyDepthCamera: public icg::DepthCamera {
-        public:
-            // Inherit the base class constructor
-            using icg::DepthCamera::DepthCamera;
-
-            // Trampoline for SetUp
-            bool SetUp() override {
-                PYBIND11_OVERRIDE_PURE(
-                    bool,
-                    DepthCamera,
-                    SetUp
-                );
-            }
-
-            // Trampoline for SetUp
-            bool UpdateImage(bool synchronized) override {
-                PYBIND11_OVERRIDE_PURE(
-                    bool,
-                    DepthCamera,
-                    UpdateImage,
-                    synchronized
-                );
-            }
-    };
-
     // DepthCamera -> not constructible, just to be able to bind RealSenseDepthCamera
-    py::class_<icg::DepthCamera, PyDepthCamera, std::shared_ptr<icg::DepthCamera>>(m, "DepthCamera");
+    py::class_<icg::DepthCamera, icg::Camera, std::shared_ptr<icg::DepthCamera>>(m, "DepthCamera");
 
     // RealSenseDepthCamera
     py::class_<icg::RealSenseDepthCamera, icg::DepthCamera, std::shared_ptr<icg::RealSenseDepthCamera>>(m, "RealSenseDepthCamera")
         .def(py::init<const std::string &, bool>(), "name"_a, "use_color_as_world_frame"_a=true)
         ;
 
+    ///
+    class PyViewer: public icg::Viewer {
+        public:
+            // Inherit the base class constructor
+            using icg::Viewer::Viewer;
+
+            bool SetUp() override {
+                PYBIND11_OVERRIDE_PURE(
+                    bool,
+                    Viewer,
+                    SetUp
+                );
+            }
+
+            bool UpdateViewer(int save_index) override {
+                PYBIND11_OVERRIDE_PURE(
+                    bool,
+                    Viewer,
+                    UpdateViewer,
+                    save_index
+                );
+            }
+    };
+
+    // Viewer
+    py::class_<Viewer, PyViewer, std::shared_ptr<icg::Viewer>>(m, "Viewer");
+
     // NormalColorViewer
-    py::class_<NormalColorViewer>(m, "NormalColorViewer")
+    py::class_<NormalColorViewer, Viewer, std::shared_ptr<icg::NormalColorViewer>>(m, "NormalColorViewer")
         .def(py::init<const std::string &, const std::shared_ptr<ColorCamera> &, const std::shared_ptr<RendererGeometry> &, float>(),
                       "name"_a, "color_camera_ptr"_a, "renderer_geometry_ptr"_a, "opacity"_a=0.5f)
         ;
 
     // NormalDepthViewer
-    py::class_<NormalDepthViewer>(m, "NormalDepthViewer")
+    py::class_<NormalDepthViewer, Viewer, std::shared_ptr<icg::NormalDepthViewer>>(m, "NormalDepthViewer")
         .def(py::init<const std::string &, const std::shared_ptr<DepthCamera> &, const std::shared_ptr<RendererGeometry> &, float, float, float>(),
                       "name"_a, "depth_camera_ptr"_a, "renderer_geometry_ptr"_a, "min_depth"_a=0.0f, "max_depth"_a=1.0f, "opacity"_a=0.5f)
         ;
 
     py::class_<FocusedBasicDepthRenderer>(m, "FocusedBasicDepthRenderer")
-        .def(py::init<const std::string &, const std::shared_ptr<RendererGeometry> &, const Transform3fA &, const Intrinsics &, int, float, float>(),
-                      "name"_a, "renderer_geometry_ptr"_a, "world2camera_pose"_a, "intrinsics"_a, "image_size"_a=200, "z_min"_a=0.01f, "z_max"_a=5.0f)       
+        // .def(py::init<const std::string &, const std::shared_ptr<RendererGeometry> &, const Transform3fA &, const Intrinsics &, int, float, float>(),
+        //               "name"_a, "renderer_geometry_ptr"_a, "world2camera_pose"_a, "intrinsics"_a, "image_size"_a=200, "z_min"_a=0.01f, "z_max"_a=5.0f)       
         .def(py::init<const std::string &, const std::shared_ptr<RendererGeometry> &, const std::shared_ptr<Camera> &, int, float, float>(),
                       "name"_a, "renderer_geometry_ptr"_a, "camera_ptr"_a, "image_size"_a=200, "z_min"_a=0.01f, "z_max"_a=5.0f)
         ;
