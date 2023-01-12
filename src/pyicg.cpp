@@ -92,7 +92,7 @@ PYBIND11_MODULE(_pyicg_mod, m) {
 
     // RealSenseColorCamera
     py::class_<icg::RealSenseColorCamera, icg::ColorCamera, std::shared_ptr<icg::RealSenseColorCamera>>(m, "RealSenseColorCamera")
-        .def(py::init<const std::string &, bool>(), "name"_a, "use_color_as_world_frame"_a=true)
+        .def(py::init<const std::string &, bool>(), "name"_a, "use_depth_as_world_frame"_a=false)
         ;
 
     // DepthCamera -> not constructible, just to be able to bind RealSenseDepthCamera
