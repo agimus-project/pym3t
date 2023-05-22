@@ -1,0 +1,18 @@
+channels:
+  - conda-forge
+dependencies:
+  - compilers
+  - cmake
+  - scikit-build
+  - opencv
+  - mesa-libgl-devel-cos7-x86_64 
+  - mesa-dri-drivers-cos7-x86_64 
+  - libselinux-cos7-x86_64
+  - libxdamage-cos7-x86_64
+  - libxxf86vm-cos7-x86_64
+  - libxext-cos7-x86_64 
+  - xorg-libxfixes
+  - libxcb
+  - glew
+  - glfw
+  - librealsense

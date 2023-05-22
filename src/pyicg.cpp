@@ -28,6 +28,7 @@
 
 // PYICG
 #include "pyicg/type_caster_utils.h"
+#include "pyicg/dummy_camera.h"
 
 namespace py = pybind11;
 // to be able to use "arg"_a shorthand
@@ -55,6 +56,10 @@ PYBIND11_MODULE(_pyicg_mod, m) {
                       "cycle_duration"_a=std::chrono::milliseconds{33}, "visualization_time"_a=0, "viewer_time"_a=1)
         .def("SetUp", &Tracker::SetUp, "set_up_all_objects"_a=true)
         .def("RunTrackerProcess", &Tracker::RunTrackerProcess, "execute_detection"_a=true, "start_tracking"_a=true)
+        .def("ExecuteDetectionCycle", &Tracker::ExecuteDetectionCycle, "iteration"_a=0, "Run all detectors, iteration arg is not used")
+        .def("StartModalities", &Tracker::StartModalities, "iteration"_a)
+        .def("ExecuteTrackingCycle", &Tracker::ExecuteTrackingCycle, "iteration"_a)
+        .def("UpdateViewers", &Tracker::UpdateViewers, "iteration"_a)
         .def("AddViewer", &Tracker::AddViewer)
         .def("AddDetector", &Tracker::AddDetector)
         .def("AddOptimizer", &Tracker::AddOptimizer)
@@ -68,6 +73,16 @@ PYBIND11_MODULE(_pyicg_mod, m) {
         .def("ClearBodies", &RendererGeometry::ClearBodies)
         ;
 
+    // Stores camera intrinsics parameters
+    py::class_<icg::Intrinsics>(m, "Intrinsics")
+        .def(py::init<float, float, float, float, int, int>(), "fu"_a, "fv"_a, "ppu"_a, "ppv"_a, "width"_a, "height"_a)
+        .def_readwrite("fu", &Intrinsics::fu)
+        .def_readwrite("fv", &Intrinsics::fv)
+        .def_readwrite("ppu", &Intrinsics::ppu)
+        .def_readwrite("ppv", &Intrinsics::ppv)
+        .def_readwrite("width", &Intrinsics::width)
+        .def_readwrite("height", &Intrinsics::height)
+        ;
 
     ///
     class PyCamera: public icg::Camera {
@@ -90,18 +105,32 @@ PYBIND11_MODULE(_pyicg_mod, m) {
     // ColorCamera -> not constructible, just to be able to bind RealSenseColorCamera
     py::class_<icg::ColorCamera, icg::Camera, std::shared_ptr<icg::ColorCamera>>(m, "ColorCamera");
 
+    // DepthCamera -> not constructible, just to be able to bind RealSenseDepthCamera
+    py::class_<icg::DepthCamera, icg::Camera, std::shared_ptr<icg::DepthCamera>>(m, "DepthCamera");
+
     // RealSenseColorCamera
     py::class_<icg::RealSenseColorCamera, icg::ColorCamera, std::shared_ptr<icg::RealSenseColorCamera>>(m, "RealSenseColorCamera")
         .def(py::init<const std::string &, bool>(), "name"_a, "use_depth_as_world_frame"_a=false)
         ;
 
-    // DepthCamera -> not constructible, just to be able to bind RealSenseDepthCamera
-    py::class_<icg::DepthCamera, icg::Camera, std::shared_ptr<icg::DepthCamera>>(m, "DepthCamera");
-
     // RealSenseDepthCamera
     py::class_<icg::RealSenseDepthCamera, icg::DepthCamera, std::shared_ptr<icg::RealSenseDepthCamera>>(m, "RealSenseDepthCamera")
         .def(py::init<const std::string &, bool>(), "name"_a, "use_color_as_world_frame"_a=true)
         ;
+
+    // TrivalColorCamera
+    py::class_<icg::DummyColorCamera, icg::ColorCamera, std::shared_ptr<icg::DummyColorCamera>>(m, "DummyColorCamera")
+        .def(py::init<const std::string &, bool>(), "name"_a, "use_depth_as_world_frame"_a=false)
+        .def_property("image", &icg::Camera::image, &icg::DummyColorCamera::set_image)
+        .def_property("intrinsics", &icg::DummyColorCamera::get_intrinsics, &icg::DummyColorCamera::set_intrinsics)
+        .def_property("color2depth_pose", &icg::DummyColorCamera::get_color2depth_pose, &icg::DummyColorCamera::set_color2depth_pose)
+        .def_property("depth2color_pose", &icg::DummyColorCamera::get_depth2color_pose, &icg::DummyColorCamera::set_depth2color_pose)
+        ;
+
+    // // TrivalDepthCamera
+    // py::class_<icg::TrivalDepthCamera, icg::DepthCamera, std::shared_ptr<icg::TrivalDepthCamera>>(m, "TrivalDepthCamera")
+    //     .def(py::init<const std::string &, bool>(), "name"_a, "use_color_as_world_frame"_a=false)
+    //     ;
 
     ///
     class PyViewer: public icg::Viewer {
@@ -117,12 +146,18 @@ PYBIND11_MODULE(_pyicg_mod, m) {
     };
 
     // Viewer
-    py::class_<Viewer, PyViewer, std::shared_ptr<icg::Viewer>>(m, "Viewer");
-
+    py::class_<Viewer, PyViewer, std::shared_ptr<icg::Viewer>>(m, "Viewer")
+        .def("StartSavingImages", &PyViewer::StartSavingImages, "save_directory"_a, "save_image_type"_a)
+        .def("StopSavingImages", &PyViewer::StopSavingImages)
+        ;
+    
     // NormalColorViewer
     py::class_<NormalColorViewer, Viewer, std::shared_ptr<icg::NormalColorViewer>>(m, "NormalColorViewer")
         .def(py::init<const std::string &, const std::shared_ptr<ColorCamera> &, const std::shared_ptr<RendererGeometry> &, float>(),
                       "name"_a, "color_camera_ptr"_a, "renderer_geometry_ptr"_a, "opacity"_a=0.5f)
+        .def("SetUp", &NormalColorViewer::SetUp)
+        .def("UpdateViewer", &NormalColorViewer::UpdateViewer, "save_index"_a)
+        .def("set_opacity", &NormalColorViewer::set_opacity, "opacity"_a)
         ;
 
     // NormalDepthViewer
