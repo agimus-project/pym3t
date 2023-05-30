@@ -15,39 +15,43 @@ namespace pybind11 {
 namespace detail {
 
 namespace py = pybind11;
-namespace E = Eigen;
 
 /**
  * Enable automatic casting of arguments and return values between numpy 4x4 arrays to
  * Eigen Affine 3D Transforms of any scalar type. Might be extended to support other Transform Mode 
  * related to other numpy matrix sizes (e.g. Eigen::Transform::AffineCompact requires a 3x4 matrix).
  * 
- * Special care about the memory layout of Eigen and numpy object. In fact, by default:
+ * Special care about the memory layout of Eigen and numpy object. By default:
  * - Eigen: column-major = Fortran style
  * - numpy: row-major = C-Style
  * Solution: define the Eigen::Transform by imposing a RowMajor underlying representation
 */
 template <typename Scalar>
-class type_caster<E::Transform<Scalar, 3, E::Affine>> {
+class type_caster<Eigen::Transform<Scalar, 3, Eigen::Affine>> {
  public:
-  using TransformTplt = E::Transform<Scalar, 3, E::Affine>;
+  using TransformTplt = Eigen::Transform<Scalar, 3, Eigen::Affine>;
 
   PYBIND11_TYPE_CASTER(TransformTplt, _("np.ndarray 4x4"));
 
   /**
-   * Python array->C++ E::Transform)
+   * Python array->C++ Eigen::Transform)
    */
   bool load(py::handle src, bool convert) {
     if (py::isinstance<py::array>(src)) {
-      py::array_t<Scalar> array = src.cast<py::array_t<Scalar>>();
+      // Did not find a way to check if  incoming array is c-style or f-style
+      // Whatever it is, it is possible to enforce a conversion to f_style (without copy if the array is already f_style) 
+      py::array_t<Scalar, py::array::f_style | py::array::forcecast> array = src.cast<py::array_t<Scalar>>();
+    //   py::array_t<Scalar, py::array::c_style | py::array::forcecast> array = src.cast<py::array_t<Scalar>>();
       // takes a 4x4 matrix
       if (array.ndim() == 2 && array.shape(0) == 4 && array.shape(1) == 4) {
-
         py::buffer_info buff_info = array.request();
         // buf.ptr is a "void *" type -> needs to be casted to "double *" before use
         Scalar *ptr = static_cast<Scalar *>(buff_info.ptr);
 
-        E::Map<const E::Matrix<Scalar, 4, 4, E::RowMajor>> matmap(ptr);
+        // Enforce a ColMajor to be coherent with f_style
+        // -> might be preferable as Eigen is optimized for ColMajor matrices
+        Eigen::Map<const Eigen::Matrix<Scalar, 4, 4, Eigen::ColMajor>> matmap(ptr);
+        // Eigen::Map<const Eigen::Matrix<Scalar, 4, 4, Eigen::RowMajor>> matmap(ptr);
 
         value.matrix() = matmap;
 
@@ -60,15 +64,18 @@ class type_caster<E::Transform<Scalar, 3, E::Affine>> {
   /**
    * Conversion part 2 (C++ -> Python)
    */
-  static py::handle cast(const E::Transform<Scalar, 3, E::Affine>& src,
+  static py::handle cast(const Eigen::Transform<Scalar, 3, Eigen::Affine>& src,
                          py::return_value_policy /* policy */,
                          py::handle /* parent */) {
     
-    // src.matrix() is column major = Fortran style, default py::array_t is c_style (row-major)
-    // -> enforce f_style to have the right representation. np.ndarray will also be F-style on python side
-    py::array_t<Scalar, py::array::f_style | py::array::forcecast> array({4,4}, src.data());
-
-    return array.release();
+    if (src.matrix().IsRowMajor){
+        py::array_t<Scalar, py::array::c_style | py::array::forcecast> array({4,4}, src.data());
+        return array.release();
+    }
+    else{
+        py::array_t<Scalar, py::array::f_style | py::array::forcecast> array({4,4}, src.data());
+        return array.release();
+    }
   }
 };
 

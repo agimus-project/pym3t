@@ -63,6 +63,7 @@ PYBIND11_MODULE(_pyicg_mod, m) {
         .def("AddViewer", &Tracker::AddViewer)
         .def("AddDetector", &Tracker::AddDetector)
         .def("AddOptimizer", &Tracker::AddOptimizer)
+        .def("DetectBodies", &Tracker::DetectBodies)
         ;
 
     // RendererGeometry
@@ -118,7 +119,7 @@ PYBIND11_MODULE(_pyicg_mod, m) {
         .def(py::init<const std::string &, bool>(), "name"_a, "use_color_as_world_frame"_a=true)
         ;
 
-    // TrivalColorCamera
+    // DummyColorCamera
     py::class_<icg::DummyColorCamera, icg::ColorCamera, std::shared_ptr<icg::DummyColorCamera>>(m, "DummyColorCamera")
         .def(py::init<const std::string &, bool>(), "name"_a, "use_depth_as_world_frame"_a=false)
         .def_property("image", &icg::Camera::image, &icg::DummyColorCamera::set_image)
@@ -127,10 +128,6 @@ PYBIND11_MODULE(_pyicg_mod, m) {
         .def_property("depth2color_pose", &icg::DummyColorCamera::get_depth2color_pose, &icg::DummyColorCamera::set_depth2color_pose)
         ;
 
-    // // TrivalDepthCamera
-    // py::class_<icg::TrivalDepthCamera, icg::DepthCamera, std::shared_ptr<icg::TrivalDepthCamera>>(m, "TrivalDepthCamera")
-    //     .def(py::init<const std::string &, bool>(), "name"_a, "use_color_as_world_frame"_a=false)
-    //     ;
 
     ///
     class PyViewer: public icg::Viewer {
@@ -149,6 +146,7 @@ PYBIND11_MODULE(_pyicg_mod, m) {
     py::class_<Viewer, PyViewer, std::shared_ptr<icg::Viewer>>(m, "Viewer")
         .def("StartSavingImages", &PyViewer::StartSavingImages, "save_directory"_a, "save_image_type"_a)
         .def("StopSavingImages", &PyViewer::StopSavingImages)
+        .def_property("display_images", &PyViewer::display_images, &PyViewer::set_display_images)
         ;
     
     // NormalColorViewer
@@ -206,8 +204,9 @@ PYBIND11_MODULE(_pyicg_mod, m) {
                       "name"_a, "body_ptr"_a, "body2world_pose"_a)
         .def(py::init<const std::string &, const std::filesystem::path &, const std::shared_ptr<icg::Body> &>(),
                       "name"_a, "metafile_path"_a, "body_ptr"_a)
+        .def_property("body2world_pose", &StaticDetector::body2world_pose, &StaticDetector::set_body2world_pose)
         ;
- 
+
 
     // RegionModel
     py::class_<RegionModel, std::shared_ptr<icg::RegionModel>>(m, "RegionModel")

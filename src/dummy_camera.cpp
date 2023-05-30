@@ -48,10 +48,6 @@ void DummyColorCamera::set_image(const cv::Mat& img){
     std::cerr << "DummyColorCamera::set_image requires a 3-channel color image, provided: " << img.channels() << std::endl;
   }
   image_ = img;
-  std::cout << "DummyColorCamera::set_image" << std::endl;
-  std::cout << img.type() << std::endl;
-  std::cout << "img.at<u_int8_t>(0,0,0): " << img.at<unsigned char>(0,0,0) << std::endl; 
-  std::cout << "image_.at<u_int8_t>(0,0,0): " << image_.at<unsigned char>(0,0,0) << std::endl; 
 }
 
 void DummyColorCamera::set_intrinsics(const Intrinsics& _intrinsics)

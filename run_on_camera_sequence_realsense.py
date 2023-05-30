@@ -82,8 +82,8 @@ depth_camera = pyicg.RealSenseDepthCamera('realsense_depth')
 Normal(Color|Depth)Viewer:
 Renders (color|normalized depth) image using info stored in renderer_geometry.
 """
-# depth_viewer = pyicg.NormalDepthViewer('depth_viewer_name', depth_camera, renderer_geometry, 0.3, 1.0)
-# tracker.AddViewer(depth_viewer)
+depth_viewer = pyicg.NormalDepthViewer('depth_viewer_name', depth_camera, renderer_geometry, 0.3, 1.0)
+tracker.AddViewer(depth_viewer)
 
 color_viewer = pyicg.NormalColorViewer('color_viewer', color_camera, renderer_geometry)
 tracker.AddViewer(color_viewer)
@@ -168,4 +168,4 @@ tracker.AddOptimizer(optimizer)
 
 ok = tracker.SetUp()
 print('tracker.SetUp ok: ', ok)
-tracker.RunTrackerProcess(execute_detection=True, start_tracking=False)
+tracker.RunTrackerProcess(execute_detection=True, start_tracking=True)

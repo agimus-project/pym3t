@@ -10,6 +10,7 @@ TODO
 ----
 * Make sure compilation is done with RELEASE flag
 * `pip install -e .` not working
+* Check https://github.com/scikit-build/scikit-build/issues/479#issuecomment-1502585979
 
 TROUBLESHOOTING
 ---------------
