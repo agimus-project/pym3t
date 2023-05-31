@@ -128,6 +128,14 @@ PYBIND11_MODULE(_pyicg_mod, m) {
         .def_property("depth2color_pose", &icg::DummyColorCamera::get_depth2color_pose, &icg::DummyColorCamera::set_depth2color_pose)
         ;
 
+    // DummyDepthCamera
+    py::class_<icg::DummyDepthCamera, icg::DepthCamera, std::shared_ptr<icg::DummyDepthCamera>>(m, "DummyDepthCamera")
+        .def(py::init<const std::string &, bool>(), "name"_a, "use_color_as_world_frame"_a=true)
+        .def_property("image", &icg::Camera::image, &icg::DummyDepthCamera::set_image)
+        .def_property("intrinsics", &icg::DummyDepthCamera::get_intrinsics, &icg::DummyDepthCamera::set_intrinsics)
+        .def_property("color2depth_pose", &icg::DummyDepthCamera::get_color2depth_pose, &icg::DummyDepthCamera::set_color2depth_pose)
+        .def_property("depth2color_pose", &icg::DummyDepthCamera::get_depth2color_pose, &icg::DummyDepthCamera::set_depth2color_pose)
+        ;
 
     ///
     class PyViewer: public icg::Viewer {
