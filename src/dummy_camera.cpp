@@ -41,7 +41,7 @@ bool DummyColorCamera::SetUp() {
   SaveMetaDataIfDesired();
   set_up_ = true;
   initial_set_up_ = true;
-  return UpdateImage(true);
+  return true;
 }
 
 void DummyColorCamera::set_use_depth_as_world_frame(bool use_depth_as_world_frame) {
@@ -77,6 +77,10 @@ bool DummyColorCamera::UpdateImage(bool synchronized) {
   if (!set_up_) {
     std::cerr << "Set up dummy color camera " << name_ << " first"
               << std::endl;
+    return false;
+  }
+  if (image_.empty()) {
+    std::cerr << "DummyColorCamera " << name_ << " image was not set" << std::endl;
     return false;
   }
 
@@ -153,7 +157,7 @@ bool DummyDepthCamera::SetUp() {
     set_camera2world_pose(depth2color_pose_);
   set_up_ = true;
   initial_set_up_ = true;
-  return UpdateImage(true);
+  return true;
 }
 
 void DummyDepthCamera::set_use_color_as_world_frame(
@@ -190,6 +194,10 @@ bool DummyDepthCamera::UpdateImage(bool synchronized) {
   if (!set_up_) {
     std::cerr << "Set up dummy depth camera " << name_ << " first"
               << std::endl;
+    return false;
+  }
+  if (image_.empty()) {
+    std::cerr << "DummyDepthCamera " << name_ << " image was not set" << std::endl;
     return false;
   }
 

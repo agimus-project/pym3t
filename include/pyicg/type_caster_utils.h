@@ -109,9 +109,9 @@ namespace pybind11
             PYBIND11_TYPE_CASTER(cv::Mat, _("numpy.ndarray"));
 
             //! 1. cast numpy.ndarray to cv::Mat
-            bool load(handle obj, bool)
+            bool load(handle src, bool)
             {
-                py::array b = py::reinterpret_borrow<array>(obj);
+                py::array b = py::reinterpret_borrow<array>(src);
                 py::buffer_info info = b.request();
 
                 int nh = 1;
@@ -138,9 +138,13 @@ namespace pybind11
                 }
 
                 int dtype;
-                if (info.format == py::format_descriptor<unsigned char>::format())
+                if (info.format == py::format_descriptor<u_int8_t>::format())
                 {
                     dtype = CV_8UC(nc);
+                }
+                else if (info.format == py::format_descriptor<u_int16_t>::format())
+                {
+                    dtype = CV_16UC(nc);
                 }
                 else if (info.format == py::format_descriptor<int>::format())
                 {
@@ -152,7 +156,7 @@ namespace pybind11
                 }
                 else
                 {
-                    throw std::logic_error("Unsupported type, only support uchar, int32, float");
+                    throw std::logic_error("Unsupported type, only support u_int8_t, u_int16_t,  int32, float");
                     return false;
                 }
 
@@ -166,8 +170,8 @@ namespace pybind11
                                py::handle /* parent */)
             {
 
-                std::string format = py::format_descriptor<unsigned char>::format();
-                size_t elemsize = sizeof(unsigned char);
+                std::string format = py::format_descriptor<u_int8_t>::format();
+                size_t elemsize = sizeof(u_int8_t);
                 int nw = mat.cols;
                 int nh = mat.rows;
                 int nc = mat.channels();
@@ -177,8 +181,13 @@ namespace pybind11
 
                 if (depth == CV_8U)
                 {
-                    format = py::format_descriptor<unsigned char>::format();
-                    elemsize = sizeof(unsigned char);
+                    format = py::format_descriptor<u_int8_t>::format();
+                    elemsize = sizeof(u_int8_t);
+                }
+                else if (depth == CV_16U)
+                {
+                    format = py::format_descriptor<u_int16_t>::format();
+                    elemsize = sizeof(u_int16_t);
                 }
                 else if (depth == CV_32S)
                 {
@@ -192,7 +201,7 @@ namespace pybind11
                 }
                 else
                 {
-                    throw std::logic_error("Unsupport type, only support uchar, int32, float");
+                    throw std::logic_error("Unsupport type, only support u_int8_t, u_int16_t, int32, float");
                 }
 
                 std::vector<size_t> bufferdim;
