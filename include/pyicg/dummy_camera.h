@@ -53,6 +53,7 @@ class DummyColorCamera : public ColorCamera {
   // Data
   bool use_depth_as_world_frame_ = false;
   bool initial_set_up_ = false;
+  bool extrinsics_set_ = false;
 
   // extrinsics
   Transform3fA color2depth_pose_{Transform3fA::Identity()};
@@ -98,6 +99,7 @@ class DummyDepthCamera : public DepthCamera {
 
   bool use_color_as_world_frame_ = true;
   bool initial_set_up_ = false;
+  bool extrinsics_set_ = false;
 
   // extrinsics
   Transform3fA color2depth_pose_{Transform3fA::Identity()};

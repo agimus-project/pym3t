@@ -31,6 +31,11 @@ bool DummyColorCamera::SetUp() {
   set_up_ = false;
   if (!metafile_path_.empty())
     if (!LoadMetaData()) return false;
+  if (!extrinsics_set_)
+  {
+    std::cerr << "DummyColorCamera::set_image color2depth_pose or depth2color_pose not set" << std::endl;
+    return false;
+  }
   if (use_depth_as_world_frame_)
     set_camera2world_pose(color2depth_pose_);
   SaveMetaDataIfDesired();
@@ -57,11 +62,13 @@ void DummyColorCamera::set_intrinsics(const Intrinsics& _intrinsics)
 }
 
 void DummyColorCamera::set_color2depth_pose(const Transform3fA& color2depth_pose) {
+  extrinsics_set_ = true;
   color2depth_pose_ = color2depth_pose;
   depth2color_pose_ = color2depth_pose.inverse();
 }
 
 void DummyColorCamera::set_depth2color_pose(const Transform3fA& depth2color_pose) {
+  extrinsics_set_ = true;
   depth2color_pose_ = depth2color_pose;
   color2depth_pose_ = depth2color_pose.inverse();
 }
@@ -137,6 +144,11 @@ bool DummyDepthCamera::SetUp() {
   set_up_ = false;
   if (!metafile_path_.empty())
     if (!LoadMetaData()) return false;
+  if (!extrinsics_set_)
+  {
+    std::cerr << "DummyDepthCamera::set_image color2depth_pose or depth2color_pose not set" << std::endl;
+    return false;
+  }
   if (use_color_as_world_frame_)
     set_camera2world_pose(depth2color_pose_);
   set_up_ = true;
@@ -163,11 +175,13 @@ void DummyDepthCamera::set_intrinsics(const Intrinsics& _intrinsics)
 }
 
 void DummyDepthCamera::set_color2depth_pose(const Transform3fA& color2depth_pose) {
+  extrinsics_set_ = true;
   color2depth_pose_ = color2depth_pose;
   depth2color_pose_ = color2depth_pose.inverse();
 }
 
 void DummyDepthCamera::set_depth2color_pose(const Transform3fA& depth2color_pose) {
+  extrinsics_set_ = true;
   depth2color_pose_ = depth2color_pose;
   color2depth_pose_ = depth2color_pose.inverse();
 }
