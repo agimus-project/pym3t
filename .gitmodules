@@ -1,3 +1,4 @@
 [submodule "extern/3DObjectTracking"]
 	path = extern/3DObjectTracking
-	url = git@github.com:DLR-RM/3DObjectTracking.git
+	url = git@github.com:MedericFourmy/3DObjectTracking.git
+	branch = origin/adapt_cmake_for_bidings
