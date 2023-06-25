@@ -37,6 +37,7 @@ class DummyColorCamera : public ColorCamera {
   void set_color2depth_pose(const Transform3fA & color2depth_pose);
   void set_depth2color_pose(const Transform3fA & depth2color_pose);
 
+
   // Main method -> does nothing in this implementation
   bool UpdateImage(bool synchronized) override;
 
@@ -83,6 +84,7 @@ class DummyDepthCamera : public DepthCamera {
   void set_intrinsics(const Intrinsics& intr);
   void set_color2depth_pose(const Transform3fA & color2depth_pose);
   void set_depth2color_pose(const Transform3fA & depth2color_pose);
+  void set_depth_scale(float depth_scale);
 
   // Main method -> does nothing in this implementation
   bool UpdateImage(bool synchronized) override;

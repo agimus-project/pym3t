@@ -60,10 +60,14 @@ PYBIND11_MODULE(_pyicg_mod, m) {
         .def("StartModalities", &Tracker::StartModalities, "iteration"_a)
         .def("ExecuteTrackingCycle", &Tracker::ExecuteTrackingCycle, "iteration"_a)
         .def("UpdateViewers", &Tracker::UpdateViewers, "iteration"_a)
+        .def("UpdateCameras", &Tracker::UpdateCameras)
         .def("AddViewer", &Tracker::AddViewer)
         .def("AddDetector", &Tracker::AddDetector)
         .def("AddOptimizer", &Tracker::AddOptimizer)
         .def("DetectBodies", &Tracker::DetectBodies)
+
+        .def_property("n_corr_iterations", &Tracker::n_corr_iterations, &Tracker::set_n_corr_iterations)
+        .def_property("n_update_iterations", &Tracker::n_update_iterations, &Tracker::set_n_update_iterations)
         ;
 
     // RendererGeometry
@@ -135,6 +139,7 @@ PYBIND11_MODULE(_pyicg_mod, m) {
         .def_property("intrinsics", &icg::DummyDepthCamera::get_intrinsics, &icg::DummyDepthCamera::set_intrinsics)
         .def_property("color2depth_pose", &icg::DummyDepthCamera::get_color2depth_pose, &icg::DummyDepthCamera::set_color2depth_pose)
         .def_property("depth2color_pose", &icg::DummyDepthCamera::get_depth2color_pose, &icg::DummyDepthCamera::set_depth2color_pose)
+        .def_property("depth_scale", &icg::DummyDepthCamera::depth_scale, &icg::DummyDepthCamera::set_depth_scale)
         ;
 
     ///

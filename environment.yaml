@@ -4,7 +4,9 @@ dependencies:
   - compilers
   - cmake
   - scikit-build
+  - pyyaml
   - opencv
+  - eigenpy
   - mesa-libgl-devel-cos7-x86_64 
   - mesa-dri-drivers-cos7-x86_64 
   - libxcb

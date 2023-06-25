@@ -190,6 +190,10 @@ void DummyDepthCamera::set_depth2color_pose(const Transform3fA& depth2color_pose
   color2depth_pose_ = depth2color_pose.inverse();
 }
 
+void DummyDepthCamera::set_depth_scale(float depth_scale) {
+  depth_scale_ = depth_scale;
+}
+
 bool DummyDepthCamera::UpdateImage(bool synchronized) {
   if (!set_up_) {
     std::cerr << "Set up dummy depth camera " << name_ << " first"
