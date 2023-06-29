@@ -15,7 +15,8 @@ Then
 
 Running
 ----
-```python3 run_image_per_image.py -b banana -m /home/mfourmy/sandbox/3DObjectTracking/ICG/examples/generator_example -i /home/mfourmy/Documents/ciirc_research/data/banana_video/bananas -s```
+```python3 run_image_per_image_color_depth.py -b banana -m /home/mfourmy/sandbox/3DObjectTracking/ICG/examples/generator_example -i /home/mfourmy/Documents/ciirc_research/data/banana_video/bananas -s```
+```python3 run_image_per_image_color.py -b banana -m /home/mfourmy/sandbox/3DObjectTracking/ICG/examples/generator_example -i /home/mfourmy/Documents/ciirc_research/data/banana_video/bananas -s```
 
 
 
