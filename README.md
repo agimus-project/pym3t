@@ -18,12 +18,12 @@ As example of usage of the library, scripts are provided: `run_image_per_image_c
 ## Setup a tracking sequence 
 
 To run the examples as is, you should have:
-* A folder containing the `<object_name>.obj` object file model
-* In a config directory (by default, `./config/`) create a `<object_name>.yaml` similar to the `banana.yaml' example. The names need to match.
-* A sequence of color (and optionally depth) images stored in the <images_dir> directory with following conventions (using default opencv formats):
+* A directory `<obj_dir>` containing the `<object_name>.obj` object file model
+* In `<obj_dir>`, a `<object_name>.yaml` file similar to the `banana.yaml' example in config directory. The "object_name" need to match with .obj file.
+* A sequence of color (and optionally depth) images stored in the `<images_dir>` directory with following conventions (using default opencv formats):
   * Color images should be 8-bit BGR, file name starting with `bgr`
   * Depth images should be 16-bit grayscale, file name starting with `depth`
-* A `static_detector.yaml` in the config directory following. This sets the initial pose from camera to object. 
+* A `static_detector.yaml` in the config directory (default is `./config/`) following. This sets the initial pose from camera to object. 
 
 ## Running the examples
 ----
@@ -36,6 +36,11 @@ python3 run_image_per_image_color.py -b <object_name> -m <obj_dir> -i <images_di
 Color + depth:   
 ```
 python3 run_image_per_image_color_depth.py -b <object_name> -m <obj_dir> -i <images_dir>
+```
+
+With a realsense camera plugged:
+```
+python3 run_on_camera_sequence_realsense.py -b <object_name> -m <obj_dir> 
 ```
 
 Check the options with `-h` argument.
