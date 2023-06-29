@@ -15,5 +15,5 @@ intrinsics_depth:
   width:  848
   height: 480
 
-quat_d_c_wxyz: [-0.001, -0.003, -0.004, 1.000] 
+quat_d_c_xyzw: [-0.001, -0.003, -0.004, 1.000] 
 trans_d_c: [-0.015, 0, 0]

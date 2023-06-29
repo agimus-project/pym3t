@@ -75,7 +75,7 @@ with open(config_dir / camera_file, 'r') as f:
     cam = yaml.load(f.read(), Loader=yaml.UnsafeLoader)
 
 color_camera = pyicg.DummyColorCamera('cam_color')
-color_camera.color2depth_pose = tq_to_SE3(cam['trans_d_c'], cam['quat_d_c_wxyz'])
+color_camera.color2depth_pose = tq_to_SE3(cam['trans_d_c'], cam['quat_d_c_xyzw'])
 color_camera.intrinsics = pyicg.Intrinsics(**cam['intrinsics_color'])
 
 depth_camera = pyicg.DummyDepthCamera('cam_depth')
