@@ -1,7 +1,6 @@
-A python wrapper around ICG tracker, __WIP__
+A python wrapper around ICG tracker from https://github.com/DLR-RM/3DObjectTracking/tree/master, __WIP__
 
-Building
-----
+# Installation
 
 `git clone git@github.com:MedericFourmy/pyicg.git --recursive`
 
@@ -13,12 +12,33 @@ Install dependencies:
 Then  
 `pip install .`
 
-Running
+# Example scripts
+As example of usage of the library, scripts are provided: `run_image_per_image_color.py` and `run_image_per_image_color_depth.py` run single object tracking.
+
+## Setup a tracking sequence 
+
+To run the examples as is, you should have:
+* A folder containing the `<object_name>.obj` object file model
+* In a config directory (by default, `./config/`) create a `<object_name>.yaml` similar to the `banana.yaml' example. The names need to match.
+* A sequence of color (and optionally depth) images stored in the <images_dir> directory with following conventions (using default opencv formats):
+  * Color images should be 8-bit BGR, file name starting with `bgr`
+  * Depth images should be 16-bit grayscale, file name starting with `depth`
+* A `static_detector.yaml` in the config directory following. This sets the initial pose from camera to object. 
+
+## Running the examples
 ----
-```python3 run_image_per_image_color_depth.py -b banana -m /home/mfourmy/sandbox/3DObjectTracking/ICG/examples/generator_example -i /home/mfourmy/Documents/ciirc_research/data/banana_video/bananas -s```
-```python3 run_image_per_image_color.py -b banana -m /home/mfourmy/sandbox/3DObjectTracking/ICG/examples/generator_example -i /home/mfourmy/Documents/ciirc_research/data/banana_video/bananas -s```
 
+Color only:   
+```
+python3 run_image_per_image_color.py -b <object_name> -m <obj_dir> -i <images_dir>
+```
 
+Color + depth:   
+```
+python3 run_image_per_image_color_depth.py -b <object_name> -m <obj_dir> -i <images_dir>
+```
+
+Check the options with `-h` argument.
 
 TODO
 ----
