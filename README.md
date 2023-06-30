@@ -2,7 +2,7 @@ A python wrapper around ICG tracker from https://github.com/DLR-RM/3DObjectTrack
 
 # Installation
 
-`git clone git@github.com:MedericFourmy/pyicg.git --recursive`
+`git clone https://github.com/MedericFourmy/pyicg.git --recursive`
 
 Install dependencies:  
 `conda create -n pyicg`  
