@@ -187,9 +187,9 @@ PYBIND11_MODULE(_pyicg_mod, m) {
     
     // Body
     py::class_<Body, std::shared_ptr<icg::Body>>(m, "Body")
-        .def(py::init<const std::string &, const std::filesystem::path &>(), "name"_a, "geometry_path"_a)
         .def(py::init<const std::string &, const std::filesystem::path &, float, bool, bool, const Transform3fA &, uchar>(),
                       "name"_a, "geometry_path"_a, "geometry_unit_in_meter"_a, "geometry_counterclockwise"_a, "geometry_enable_culling"_a, "geometry2body_pose"_a, "silhouette_id"_a=0)
+        .def(py::init<const std::string &, const std::filesystem::path &>(), "name"_a, "metafile_path"_a)
         .def_property("body2world_pose", &Body::body2world_pose, &Body::set_body2world_pose)
         .def_property("world2body_pose", &Body::world2body_pose, &Body::set_world2body_pose)
         ;
