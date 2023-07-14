@@ -224,6 +224,7 @@ PYBIND11_MODULE(_pyicg_mod, m) {
                       "name"_a, "body_ptr"_a, "body2world_pose"_a)
         .def(py::init<const std::string &, const std::filesystem::path &, const std::shared_ptr<icg::Body> &>(),
                       "name"_a, "metafile_path"_a, "body_ptr"_a)
+        .def("SetUp", &StaticDetector::SetUp)
         .def_property("body2world_pose", &StaticDetector::body2world_pose, &StaticDetector::set_body2world_pose)
         ;
 

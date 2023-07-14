@@ -118,7 +118,8 @@ color_depth_renderer.AddReferencedBody(body)
 # Detector
 detector_path = config_dir / detector_file
 detector = pyicg.StaticDetector('static_detector', detector_path.as_posix(), body)
-tracker.AddDetector(detector)
+detector.SetUp()  # reads the definition
+# tracker.AddDetector(detector)  # tracker sets up fine even without a detector!
 
 # Models
 region_model_path = tmp_dir / (body_name + '_region_model.bin')
@@ -153,31 +154,32 @@ print(tracker.n_update_iterations)
 tracker.n_update_iterations = 5
 
 # Simulate one iteration of Tracker::RunTrackerProcess for loop
-for iter, img_bgr in enumerate(img_bgr_lst):
-    print('Iter: ', iter)
+for it, img_bgr in enumerate(img_bgr_lst):
+    print('Iter: ', it)
     # 1) Update camera image -> replaces a call to the camera UpdateImage method (which does nothing for Dummy(Color|Depth)Camera) 
     color_camera.image = img_bgr
     ok = tracker.UpdateCameras(True)  # poststep verifying the images have been properly setup
     if not ok:
         raise ValueError('Something is wrong with the provided images')
 
-    if iter == 0:
+    if it == 0:
         # 2) Use detector or external init to update initial object pose
+        # body.body2world_pose = detector.body2world_pose  # simulate external initial pose
         body.body2world_pose = detector.body2world_pose  # simulate external initial pose
-        # tracker.ExecuteDetectionCycle(iter)  # use detectector
+        # tracker.ExecuteDetectionCycle(it)  # use detectector
         # tracker.DetectBodies()  # use detectector
 
         # 3) Initialise the different modalities (e.g. the color histograms)
-        tracker.StartModalities(iter)
+        tracker.StartModalities(it)
         
     # 4) One tracking cycle (could call it several time)
     t = time.time()
-    tracker.ExecuteTrackingCycle(iter)
+    tracker.ExecuteTrackingCycle(it)
     print('ExecuteTrackingCycle (ms)', 1000*(time.time() - t))
 
     # 5) Render results
     t = time.time()
-    tracker.UpdateViewers(iter)
+    tracker.UpdateViewers(it)
     print('UpdateViewers (ms)', 1000*(time.time() - t))
 
     if stop:
