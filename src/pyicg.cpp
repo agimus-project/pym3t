@@ -190,6 +190,13 @@ PYBIND11_MODULE(_pyicg_mod, m) {
         .def(py::init<const std::string &, const std::filesystem::path &, float, bool, bool, const Transform3fA &, uchar>(),
                       "name"_a, "geometry_path"_a, "geometry_unit_in_meter"_a, "geometry_counterclockwise"_a, "geometry_enable_culling"_a, "geometry2body_pose"_a, "silhouette_id"_a=0)
         .def(py::init<const std::string &, const std::filesystem::path &>(), "name"_a, "metafile_path"_a)
+        .def_property("name", &Body::name, &Body::set_name)
+        .def_property("geometry_path", &Body::geometry_path, &Body::set_geometry_path)
+        .def_property("metafile_path", &Body::metafile_path, &Body::set_metafile_path)
+        .def_property("geometry_unit_in_meter", &Body::geometry_unit_in_meter, &Body::set_geometry_unit_in_meter)
+        .def_property("geometry_counterclockwise", &Body::geometry_counterclockwise, &Body::set_geometry_counterclockwise)
+        .def_property("geometry_enable_culling", &Body::geometry_enable_culling, &Body::set_geometry_enable_culling)
+        .def_property("geometry2body_pose", &Body::geometry2body_pose, &Body::set_geometry2body_pose)
         .def_property("body2world_pose", &Body::body2world_pose, &Body::set_body2world_pose)
         .def_property("world2body_pose", &Body::world2body_pose, &Body::set_world2body_pose)
         ;

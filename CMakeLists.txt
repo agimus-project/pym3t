@@ -6,7 +6,8 @@ find_package(pybind11 CONFIG REQUIRED)
 # TODO: find a way to pass these options as command line arguments
 set(USE_AZURE_KINECT OFF CACHE BOOL "Use Azure Kinect")
 set(USE_REALSENSE ON CACHE BOOL "Use RealSense D435")
-set(CMAKE_BUILD_TYPE OFF CACHE BOOL "")
+set(CMAKE_BUILD_TYPE "RELEASE")
+# set(CMAKE_BUILD_TYPE "DEBUG")
 
 set(CMAKE_CXX_STANDARD 17)
 

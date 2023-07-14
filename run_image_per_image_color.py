@@ -87,9 +87,31 @@ tracker.AddViewer(color_viewer)
 # Renderers (preprocessing)
 color_depth_renderer = pyicg.FocusedBasicDepthRenderer('color_depth_renderer', renderer_geometry, color_camera)
 
-# Bodies
+# Bodies, careful about geometry units!
+# - if error when generating sparse model view -> units too big
+# - if object projection too smal -> units too big
+geometry_unit_in_meter_ycbv_urdf = 0.001
 metafile_path = models_dir / (body_name+'.yaml')
-body = pyicg.Body(body_name, metafile_path.as_posix())
+if metafile_path.exists():
+    print('Body metafile_path constructor')
+    body = pyicg.Body(body_name, metafile_path.as_posix())
+else:
+    print('Body full model path constructor')
+    obj_files = list(models_dir.glob('*.obj'))
+    if len(obj_files) >= 1:
+        obj_path: Path = obj_files[0]
+    else:
+        raise FileNotFoundError('models_dir does not contain <body_name>.yaml or <body_name>.obj file')
+    print('obj_path: ', obj_path)
+    body = pyicg.Body(
+        name=body_name,
+        geometry_path=obj_path.as_posix(),
+        geometry_unit_in_meter=geometry_unit_in_meter_ycbv_urdf,
+        geometry_counterclockwise=1,
+        geometry_enable_culling=1,
+        geometry2body_pose=np.eye(4)
+    )
+
 renderer_geometry.AddBody(body)
 color_depth_renderer.AddReferencedBody(body)
 
@@ -111,7 +133,8 @@ tracker.AddOptimizer(optimizer)
 
 # Do all the necessary heavy preprocessing
 ok = tracker.SetUp()
-print('tracker.SetUp ok: ', ok)
+if not ok:
+    raise(ValueError('Error in SetUp'))
 
 # read images from disk
 rgb_names = sorted(glob.glob((imgs_dir / 'bgr*').as_posix()))
