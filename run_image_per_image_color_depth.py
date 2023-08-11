@@ -48,6 +48,7 @@ def parse_script_input():
     parser.add_argument('--camera_file',   dest='camera_file',   type=str, default='cam_d435_640.yaml')
     parser.add_argument('--nb_img_load',   dest='nb_img_load',   type=int, default=-1)
     parser.add_argument('--use_depth',     dest='use_depth',     action='store_true', default=False)
+    parser.add_argument('--model_occlusions', dest='model_occlusions', action='store_true', default=False)
     parser.add_argument('-s', '--stop',    dest='stop',          action='store_true', default=False)
 
     return parser.parse_args()
@@ -63,6 +64,7 @@ tmp_dir = Path(args.tmp_dir)
 detector_file = args.detector_file
 camera_file = args.camera_file
 use_depth = args.use_depth
+model_occlusions = args.model_occlusions
 nb_img_load = args.nb_img_load
 stop = args.stop
 
@@ -90,15 +92,11 @@ depth_viewer = pyicg.NormalDepthViewer('depth_viewer', depth_camera, renderer_ge
 tracker.AddViewer(depth_viewer)
 tracker.AddViewer(color_viewer)
 
-# Renderers (preprocessing)
-color_depth_renderer = pyicg.FocusedBasicDepthRenderer('color_depth_renderer', renderer_geometry, color_camera)
-depth_depth_renderer = pyicg.FocusedBasicDepthRenderer('depth_depth_renderer', renderer_geometry, depth_camera)
 
 # Bodies
 metafile_path = models_dir / (body_name+'.yaml')
 body = pyicg.Body(body_name, metafile_path.as_posix())
 renderer_geometry.AddBody(body)
-color_depth_renderer.AddReferencedBody(body)
 
 # Detector
 detector_path = config_dir / detector_file
@@ -114,6 +112,27 @@ depth_model = pyicg.DepthModel(body_name + '_depth_model', body, depth_model_pat
 # Modalities
 region_modality = pyicg.RegionModality(body_name + '_region_modality', body, color_camera, region_model)
 depth_modality = pyicg.DepthModality(body_name + '_depth_modality', body, depth_camera, depth_model)
+
+
+
+
+if model_occlusions:
+    raise NotImplementedError('region_modality.ModelOcclusions binding does not work properly yet')
+
+    """
+    FocusedRenderer: interface with OpenGL, render only part of the image where tracked objects are present 
+                    -> projection matrix is recomputed each time a new render is done (contrary to FullRender)
+    Used for render based occlusion handling.
+    """
+    # We need 2 renderers because depth and color are slightly not aligned
+    color_depth_renderer = pyicg.FocusedBasicDepthRenderer('color_depth_renderer', renderer_geometry, color_camera)
+    depth_depth_renderer = pyicg.FocusedBasicDepthRenderer('depth_depth_renderer', renderer_geometry, depth_camera)
+    color_depth_renderer.AddReferencedBody(body)
+    depth_depth_renderer.AddReferencedBody(body)
+
+    region_modality.ModelOcclusions(color_depth_renderer)
+    depth_modality.ModelOcclusions(depth_depth_renderer)
+
 
 optimizer = pyicg.Optimizer(body_name+'_optimizer')
 optimizer.AddModality(region_modality)

@@ -159,6 +159,7 @@ PYBIND11_MODULE(_pyicg_mod, m) {
     py::class_<Viewer, PyViewer, std::shared_ptr<icg::Viewer>>(m, "Viewer")
         .def("StartSavingImages", &PyViewer::StartSavingImages, "save_directory"_a, "save_image_type"_a)
         .def("StopSavingImages", &PyViewer::StopSavingImages)
+        .def("save_images", &PyViewer::save_images)
         .def_property("display_images", &PyViewer::display_images, &PyViewer::set_display_images)
         ;
     
@@ -177,6 +178,10 @@ PYBIND11_MODULE(_pyicg_mod, m) {
                       "name"_a, "depth_camera_ptr"_a, "renderer_geometry_ptr"_a, "min_depth"_a=0.0f, "max_depth"_a=1.0f, "opacity"_a=0.5f)
         ;
 
+
+    /**
+     * Renderers for occlusion handling
+     * */ 
     py::class_<FocusedBasicDepthRenderer>(m, "FocusedBasicDepthRenderer")
         // .def(py::init<const std::string &, const std::shared_ptr<RendererGeometry> &, const Transform3fA &, const Intrinsics &, int, float, float>(),
         //               "name"_a, "renderer_geometry_ptr"_a, "world2camera_pose"_a, "intrinsics"_a, "image_size"_a=200, "z_min"_a=0.01f, "z_max"_a=5.0f)       
@@ -278,6 +283,8 @@ PYBIND11_MODULE(_pyicg_mod, m) {
     py::class_<RegionModality, Modality, std::shared_ptr<icg::RegionModality>>(m, "RegionModality")
         .def(py::init<const std::string &, const std::shared_ptr<Body> &, const std::shared_ptr<ColorCamera> &, const std::shared_ptr<RegionModel> &>(),
                       "name"_a, "body_ptr"_a, "color_camera_ptr"_a, "region_model_ptr"_a)
+        .def("ModelOcclusions", &RegionModality::ModelOcclusions)
+        .def("MeasureOcclusions", &RegionModality::MeasureOcclusions)
         .def_property("visualize_pose_result", &RegionModality::visualize_pose_result, &RegionModality::set_visualize_pose_result)
         .def_property("visualize_lines_correspondence", &RegionModality::visualize_lines_correspondence, &RegionModality::set_visualize_lines_correspondence)
         .def_property("visualize_points_correspondence", &RegionModality::visualize_points_correspondence, &RegionModality::set_visualize_points_correspondence)
@@ -289,7 +296,6 @@ PYBIND11_MODULE(_pyicg_mod, m) {
         .def_property("visualize_points_optimization", &RegionModality::visualize_points_optimization, &RegionModality::set_visualize_points_optimization)
         .def_property("visualize_gradient_optimization", &RegionModality::visualize_gradient_optimization, &RegionModality::set_visualize_gradient_optimization)
         .def_property("visualize_hessian_optimization", &RegionModality::visualize_hessian_optimization, &RegionModality::set_visualize_hessian_optimization)
-        .def("MeasureOcclusions", &RegionModality::MeasureOcclusions)
         ;
 
 
@@ -297,6 +303,7 @@ PYBIND11_MODULE(_pyicg_mod, m) {
     py::class_<DepthModality, Modality, std::shared_ptr<icg::DepthModality>>(m, "DepthModality")
         .def(py::init<const std::string &, const std::shared_ptr<Body> &, const std::shared_ptr<DepthCamera> &, const std::shared_ptr<DepthModel> &>(),
                       "name"_a, "body_ptr"_a, "depth_camera_ptr"_a, "depth_model_ptr"_a)
+        .def("ModelOcclusions", &DepthModality::ModelOcclusions)
         .def("MeasureOcclusions", &DepthModality::MeasureOcclusions)
         ;
 
