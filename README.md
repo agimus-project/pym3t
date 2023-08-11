@@ -7,7 +7,7 @@ A python wrapper around ICG tracker from https://github.com/DLR-RM/3DObjectTrack
 Install dependencies:  
 `conda create -n pyicg`  
 `conda activate pyicg`  
-`mamba update --file environment.yaml`
+`mamba env update --file environment.yaml`
 
 Then  
 `pip install .`
