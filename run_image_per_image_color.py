@@ -47,7 +47,8 @@ def parse_script_input():
     parser.add_argument('--detector_file', dest='detector_file', type=str, default='static_detector.yaml')
     parser.add_argument('--camera_file',   dest='camera_file',   type=str, default='cam_d435_640.yaml')
     parser.add_argument('--nb_img_load',   dest='nb_img_load',   type=int, default=-1)
-    parser.add_argument('--use_depth',     dest='use_depth',     action='store_true', default=False)
+    parser.add_argument('--display',       dest='display',       action='store_true', default=False)
+    parser.add_argument('--save',          dest='save',          action='store_true', default=False)
     parser.add_argument('--model_occlusions', dest='model_occlusions', action='store_true', default=False)
     parser.add_argument('-s', '--stop',    dest='stop',          action='store_true', default=False)
 
@@ -56,24 +57,17 @@ def parse_script_input():
 
 args = parse_script_input()
 
-body_name = args.body_name
 models_dir = Path(args.models_dir)
 imgs_dir = Path(args.imgs_dir)
 config_dir = Path(args.config_dir)
 tmp_dir = Path(args.tmp_dir)
-detector_file = args.detector_file
-camera_file = args.camera_file
-use_depth = args.use_depth
-model_occlusions = args.model_occlusions
-nb_img_load = args.nb_img_load
-stop = args.stop
 
 
 tracker = pyicg.Tracker('tracker', synchronize_cameras=False)
 
 renderer_geometry = pyicg.RendererGeometry('renderer geometry')
 
-with open(config_dir / camera_file, 'r') as f:
+with open(config_dir / args.camera_file, 'r') as f:
     cam = yaml.load(f.read(), Loader=yaml.UnsafeLoader)
 
 color_camera = pyicg.DummyColorCamera('cam_color')
@@ -82,18 +76,19 @@ color_camera.intrinsics = pyicg.Intrinsics(**cam['intrinsics_color'])
 
 # Viewers
 color_viewer = pyicg.NormalColorViewer('color_viewer', color_camera, renderer_geometry)
-# color_viewer.StartSavingImages('tmp', 'bmp')
+color_viewer.StartSavingImages('tmp', 'png')
 color_viewer.set_opacity(0.5)  # [0.0-1.0]
+color_viewer.display_images = args.display
 tracker.AddViewer(color_viewer)
 
 # Bodies, careful about geometry units!
 # - if error when generating sparse model view -> units too big
 # - if object projection too smal -> units too big
 geometry_unit_in_meter_ycbv_urdf = 0.001
-metafile_path = models_dir / (body_name+'.yaml')
+metafile_path = models_dir / (args.body_name+'.yaml')
 if metafile_path.exists():
     print('Body metafile_path constructor')
-    body = pyicg.Body(body_name, metafile_path.as_posix())
+    body = pyicg.Body(args.body_name, metafile_path.as_posix())
 else:
     print('Body full model path constructor')
     obj_files = list(models_dir.glob('*.obj'))
@@ -103,7 +98,7 @@ else:
         raise FileNotFoundError('models_dir does not contain <body_name>.yaml or <body_name>.obj file')
     print('obj_path: ', obj_path)
     body = pyicg.Body(
-        name=body_name,
+        name=args.body_name,
         geometry_path=obj_path.as_posix(),
         geometry_unit_in_meter=geometry_unit_in_meter_ycbv_urdf,
         geometry_counterclockwise=1,
@@ -114,20 +109,20 @@ else:
 renderer_geometry.AddBody(body)
 
 # Detector
-detector_path = config_dir / detector_file
+detector_path = config_dir / args.detector_file
 detector = pyicg.StaticDetector('static_detector', detector_path.as_posix(), body)
 detector.SetUp()  # reads the definition
 # tracker.AddDetector(detector)  # tracker sets up fine even without a detector!
 
 # Models
-region_model_path = tmp_dir / (body_name + '_region_model.bin')
-region_model = pyicg.RegionModel(body_name + '_region_model', body, region_model_path.as_posix())
+region_model_path = tmp_dir / (args.body_name + '_region_model.bin')
+region_model = pyicg.RegionModel(args.body_name + '_region_model', body, region_model_path.as_posix())
 
 # Modalities
-region_modality = pyicg.RegionModality(body_name + '_region_modality', body, color_camera, region_model)
+region_modality = pyicg.RegionModality(args.body_name + '_region_modality', body, color_camera, region_model)
 
 
-if model_occlusions:
+if args.model_occlusions:
     raise NotImplementedError('region_modality.ModelOcclusions binding does not work properly yet')
 
     """
@@ -141,7 +136,7 @@ if model_occlusions:
     region_modality.ModelOcclusions(color_depth_renderer)  # NOT WORKING
 
 
-optimizer = pyicg.Optimizer(body_name+'_optimizer')
+optimizer = pyicg.Optimizer('optimizer')
 optimizer.AddModality(region_modality)
 tracker.AddOptimizer(optimizer)
 
@@ -154,7 +149,7 @@ if not ok:
 rgb_names = sorted(glob.glob((imgs_dir / 'bgr*').as_posix()))
 
 # LIMIT nb images
-rgb_names = rgb_names[:nb_img_load]
+rgb_names = rgb_names[:args.nb_img_load]
 print(f'{len(rgb_names)} images to load')
 
 # load images from disk
@@ -195,6 +190,6 @@ for it, img_bgr in enumerate(img_bgr_lst):
     tracker.UpdateViewers(it)
     print('UpdateViewers (ms)', 1000*(time.time() - t))
 
-    if stop:
+    if args.stop:
         cv2.waitKey(0)
 
