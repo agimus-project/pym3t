@@ -102,15 +102,17 @@ PYBIND11_MODULE(_pyicg_mod, m) {
                 PYBIND11_OVERRIDE_PURE( bool, Camera, UpdateImage, synchronized);}
     };
 
-    // Camera -> not constructible, just to be able to bind RealSenseColorCamera and enable automatic downcasting
+    // Camera -> not constructible, just to enable automatic downcasting and binding of child classes
     py::class_<icg::Camera, PyCamera, std::shared_ptr<icg::Camera>>(m, "Camera")
         .def("SetUp", &icg::Camera::SetUp)
+        .def_property("camera2world_pose", &icg::Camera::camera2world_pose, &icg::Camera::set_camera2world_pose)
+        .def_property("world2camera_pose", &icg::Camera::world2camera_pose, &icg::Camera::set_world2camera_pose)
         ;
 
-    // ColorCamera -> not constructible, just to be able to bind RealSenseColorCamera
+    // ColorCamera -> not constructible, just to enable automatic downcasting and binding of child classes
     py::class_<icg::ColorCamera, icg::Camera, std::shared_ptr<icg::ColorCamera>>(m, "ColorCamera");
 
-    // DepthCamera -> not constructible, just to be able to bind RealSenseDepthCamera
+    // DepthCamera -> not constructible, just to enable automatic downcasting and binding of child classes
     py::class_<icg::DepthCamera, icg::Camera, std::shared_ptr<icg::DepthCamera>>(m, "DepthCamera");
 
     // RealSenseColorCamera
