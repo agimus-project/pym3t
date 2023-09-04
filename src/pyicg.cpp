@@ -6,10 +6,10 @@
 // core
 #include <pybind11/pybind11.h>
 // implicit type conversions
+#include <pybind11/stl.h>
 #include <pybind11/eigen.h>
 #include <pybind11/chrono.h>
 #include <pybind11/stl/filesystem.h>
-
 // ICG
 #include <icg/common.h>
 #include <icg/camera.h>
@@ -285,8 +285,37 @@ PYBIND11_MODULE(_pyicg_mod, m) {
     py::class_<RegionModality, Modality, std::shared_ptr<icg::RegionModality>>(m, "RegionModality")
         .def(py::init<const std::string &, const std::shared_ptr<Body> &, const std::shared_ptr<ColorCamera> &, const std::shared_ptr<RegionModel> &>(),
                       "name"_a, "body_ptr"_a, "color_camera_ptr"_a, "region_model_ptr"_a)
+                
+        .def_property("n_lines", &RegionModality::n_lines, &RegionModality::set_n_lines)
+        .def_property("min_continuous_distance", &RegionModality::min_continuous_distance, &RegionModality::set_min_continuous_distance)
+        .def_property("function_length", &RegionModality::function_length, &RegionModality::set_function_length)
+        .def_property("distribution_length", &RegionModality::distribution_length, &RegionModality::set_distribution_length)
+        .def_property("function_amplitude", &RegionModality::function_amplitude, &RegionModality::set_function_amplitude)
+        .def_property("function_slope", &RegionModality::function_slope, &RegionModality::set_function_slope)
+        .def_property("learning_rate", &RegionModality::learning_rate, &RegionModality::set_learning_rate)
+        .def_property("n_global_iterations", &RegionModality::n_global_iterations, &RegionModality::set_n_global_iterations)
+        .def_property("scales", &RegionModality::scales, &RegionModality::set_scales)
+        .def_property("standard_deviations", &RegionModality::standard_deviations, &RegionModality::set_standard_deviations)
+
+        .def_property("n_histogram_bins", &RegionModality::n_histogram_bins, &RegionModality::set_n_histogram_bins)
+        .def_property("learning_rate_f", &RegionModality::learning_rate_f, &RegionModality::set_learning_rate_f)
+        .def_property("learning_rate_b", &RegionModality::learning_rate_b, &RegionModality::set_learning_rate_b)
+        .def_property("unconsidered_line_length", &RegionModality::unconsidered_line_length, &RegionModality::set_unconsidered_line_length)
+        .def_property("max_considered_line_length", &RegionModality::max_considered_line_length, &RegionModality::set_max_considered_line_length)
+
+        .def_property("max_considered_line_length", &RegionModality::max_considered_line_length, &RegionModality::set_max_considered_line_length)
+        .def_property("measured_depth_offset_radius", &RegionModality::measured_depth_offset_radius, &RegionModality::set_measured_depth_offset_radius)
+        .def_property("measured_occlusion_radius", &RegionModality::measured_occlusion_radius, &RegionModality::set_measured_occlusion_radius)
+        .def_property("measured_occlusion_threshold", &RegionModality::measured_occlusion_threshold, &RegionModality::set_measured_occlusion_threshold)
+        .def_property("modeled_depth_offset_radius", &RegionModality::modeled_depth_offset_radius, &RegionModality::set_modeled_depth_offset_radius)
+        .def_property("modeled_occlusion_radius", &RegionModality::modeled_occlusion_radius, &RegionModality::set_modeled_occlusion_radius)
+        .def_property("modeled_occlusion_threshold", &RegionModality::modeled_occlusion_threshold, &RegionModality::set_modeled_occlusion_threshold)
+        .def_property("n_unoccluded_iterations", &RegionModality::n_unoccluded_iterations, &RegionModality::set_n_unoccluded_iterations)
+        .def_property("min_n_unoccluded_lines", &RegionModality::min_n_unoccluded_lines, &RegionModality::set_min_n_unoccluded_lines)
+
         .def("ModelOcclusions", &RegionModality::ModelOcclusions)
         .def("MeasureOcclusions", &RegionModality::MeasureOcclusions)
+
         .def_property("visualize_pose_result", &RegionModality::visualize_pose_result, &RegionModality::set_visualize_pose_result)
         .def_property("visualize_lines_correspondence", &RegionModality::visualize_lines_correspondence, &RegionModality::set_visualize_lines_correspondence)
         .def_property("visualize_points_correspondence", &RegionModality::visualize_points_correspondence, &RegionModality::set_visualize_points_correspondence)
@@ -305,8 +334,21 @@ PYBIND11_MODULE(_pyicg_mod, m) {
     py::class_<DepthModality, Modality, std::shared_ptr<icg::DepthModality>>(m, "DepthModality")
         .def(py::init<const std::string &, const std::shared_ptr<Body> &, const std::shared_ptr<DepthCamera> &, const std::shared_ptr<DepthModel> &>(),
                       "name"_a, "body_ptr"_a, "depth_camera_ptr"_a, "depth_model_ptr"_a)
+
+        .def_property("considered_distances", &DepthModality::considered_distances, &DepthModality::set_considered_distances)
+        .def_property("standard_deviations", &DepthModality::standard_deviations, &DepthModality::set_standard_deviations)
+
         .def("ModelOcclusions", &DepthModality::ModelOcclusions)
         .def("MeasureOcclusions", &DepthModality::MeasureOcclusions)
+
+        .def_property("measured_depth_offset_radius", &DepthModality::measured_depth_offset_radius, &DepthModality::set_measured_depth_offset_radius)
+        .def_property("measured_occlusion_radius", &DepthModality::measured_occlusion_radius, &DepthModality::set_measured_occlusion_radius)
+        .def_property("measured_occlusion_threshold", &DepthModality::measured_occlusion_threshold, &DepthModality::set_measured_occlusion_threshold)
+        .def_property("modeled_depth_offset_radius", &DepthModality::modeled_depth_offset_radius, &DepthModality::set_modeled_depth_offset_radius)
+        .def_property("modeled_occlusion_radius", &DepthModality::modeled_occlusion_radius, &DepthModality::set_modeled_occlusion_radius)
+        .def_property("modeled_occlusion_threshold", &DepthModality::modeled_occlusion_threshold, &DepthModality::set_modeled_occlusion_threshold)
+        .def_property("n_unoccluded_iterations", &DepthModality::n_unoccluded_iterations, &DepthModality::set_n_unoccluded_iterations)
+        .def_property("min_n_unoccluded_points", &DepthModality::min_n_unoccluded_points, &DepthModality::set_min_n_unoccluded_points)
         ;
 
     // Optimizer
