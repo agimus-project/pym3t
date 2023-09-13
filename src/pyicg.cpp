@@ -303,7 +303,9 @@ PYBIND11_MODULE(_pyicg_mod, m) {
         .def_property("unconsidered_line_length", &RegionModality::unconsidered_line_length, &RegionModality::set_unconsidered_line_length)
         .def_property("max_considered_line_length", &RegionModality::max_considered_line_length, &RegionModality::set_max_considered_line_length)
 
-        .def_property("max_considered_line_length", &RegionModality::max_considered_line_length, &RegionModality::set_max_considered_line_length)
+        .def("ModelOcclusions", &RegionModality::ModelOcclusions)
+        .def("MeasureOcclusions", &RegionModality::MeasureOcclusions)
+
         .def_property("measured_depth_offset_radius", &RegionModality::measured_depth_offset_radius, &RegionModality::set_measured_depth_offset_radius)
         .def_property("measured_occlusion_radius", &RegionModality::measured_occlusion_radius, &RegionModality::set_measured_occlusion_radius)
         .def_property("measured_occlusion_threshold", &RegionModality::measured_occlusion_threshold, &RegionModality::set_measured_occlusion_threshold)
@@ -312,9 +314,6 @@ PYBIND11_MODULE(_pyicg_mod, m) {
         .def_property("modeled_occlusion_threshold", &RegionModality::modeled_occlusion_threshold, &RegionModality::set_modeled_occlusion_threshold)
         .def_property("n_unoccluded_iterations", &RegionModality::n_unoccluded_iterations, &RegionModality::set_n_unoccluded_iterations)
         .def_property("min_n_unoccluded_lines", &RegionModality::min_n_unoccluded_lines, &RegionModality::set_min_n_unoccluded_lines)
-
-        .def("ModelOcclusions", &RegionModality::ModelOcclusions)
-        .def("MeasureOcclusions", &RegionModality::MeasureOcclusions)
 
         .def_property("visualize_pose_result", &RegionModality::visualize_pose_result, &RegionModality::set_visualize_pose_result)
         .def_property("visualize_lines_correspondence", &RegionModality::visualize_lines_correspondence, &RegionModality::set_visualize_lines_correspondence)
@@ -351,6 +350,12 @@ PYBIND11_MODULE(_pyicg_mod, m) {
         .def_property("modeled_occlusion_threshold", &DepthModality::modeled_occlusion_threshold, &DepthModality::set_modeled_occlusion_threshold)
         .def_property("n_unoccluded_iterations", &DepthModality::n_unoccluded_iterations, &DepthModality::set_n_unoccluded_iterations)
         .def_property("min_n_unoccluded_points", &DepthModality::min_n_unoccluded_points, &DepthModality::set_min_n_unoccluded_points)
+
+        .def_property("visualize_correspondences_correspondence", &DepthModality::visualize_correspondences_correspondence, &DepthModality::set_visualize_correspondences_correspondence)
+        .def_property("visualize_points_correspondence", &DepthModality::visualize_points_correspondence, &DepthModality::set_visualize_points_correspondence)
+        .def_property("visualize_points_depth_rendering_correspondence", &DepthModality::visualize_points_depth_rendering_correspondence, &DepthModality::set_visualize_points_depth_rendering_correspondence)
+        .def_property("visualize_points_optimization", &DepthModality::visualize_points_optimization, &DepthModality::set_visualize_points_optimization)
+        .def_property("visualize_points_result", &DepthModality::visualize_points_result, &DepthModality::set_visualize_points_result)
         ;
 
     // Optimizer
