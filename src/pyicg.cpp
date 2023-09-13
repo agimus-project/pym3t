@@ -136,7 +136,7 @@ PYBIND11_MODULE(_pyicg_mod, m) {
 
     // DummyDepthCamera
     py::class_<icg::DummyDepthCamera, icg::DepthCamera, std::shared_ptr<icg::DummyDepthCamera>>(m, "DummyDepthCamera")
-        .def(py::init<const std::string &, bool>(), "name"_a, "use_color_as_world_frame"_a=true)
+        .def(py::init<const std::string &, bool, float>(), "name"_a, "use_color_as_world_frame"_a=true, "depth_scale"_a=0.001)
         .def_property("image", &icg::Camera::image, &icg::DummyDepthCamera::set_image)
         .def_property("intrinsics", &icg::DummyDepthCamera::get_intrinsics, &icg::DummyDepthCamera::set_intrinsics)
         .def_property("color2depth_pose", &icg::DummyDepthCamera::get_color2depth_pose, &icg::DummyDepthCamera::set_color2depth_pose)
@@ -335,6 +335,8 @@ PYBIND11_MODULE(_pyicg_mod, m) {
         .def(py::init<const std::string &, const std::shared_ptr<Body> &, const std::shared_ptr<DepthCamera> &, const std::shared_ptr<DepthModel> &>(),
                       "name"_a, "body_ptr"_a, "depth_camera_ptr"_a, "depth_model_ptr"_a)
 
+        .def_property("n_points", &DepthModality::n_points, &DepthModality::set_n_points)
+        .def_property("stride_length", &DepthModality::stride_length, &DepthModality::set_stride_length)
         .def_property("considered_distances", &DepthModality::considered_distances, &DepthModality::set_considered_distances)
         .def_property("standard_deviations", &DepthModality::standard_deviations, &DepthModality::set_standard_deviations)
 

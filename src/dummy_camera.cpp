@@ -134,9 +134,12 @@ bool DummyColorCamera::LoadMetaData() {
 */
 
 DummyDepthCamera::DummyDepthCamera(const std::string &name,
-                                           bool use_color_as_world_frame)
+                                   bool use_color_as_world_frame,
+                                   float depth_scale)
     : DepthCamera{name},
-      use_color_as_world_frame_{use_color_as_world_frame} {}
+      use_color_as_world_frame_{use_color_as_world_frame} {
+  set_depth_scale(depth_scale);
+}
 
 DummyDepthCamera::DummyDepthCamera(
     const std::string &name, const std::filesystem::path &metafile_path)

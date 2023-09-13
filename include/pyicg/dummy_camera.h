@@ -24,9 +24,9 @@ class DummyColorCamera : public ColorCamera {
  public:
   // Constructors, destructor, and setup method
   DummyColorCamera(const std::string &name,
-                       bool use_depth_as_world_frame = false);
+                   bool use_depth_as_world_frame = false);
   DummyColorCamera(const std::string &name,
-                       const std::filesystem::path &metafile_path);
+                   const std::filesystem::path &metafile_path);
   ~DummyColorCamera();
   bool SetUp() override;
 
@@ -72,9 +72,10 @@ class DummyDepthCamera : public DepthCamera {
  public:
   // Constructors, destructor, and setup method
   DummyDepthCamera(const std::string &name,
-                       bool use_color_as_world_frame = true);
+                   bool use_color_as_world_frame,
+                   float depth_scale);
   DummyDepthCamera(const std::string &name,
-                       const std::filesystem::path &metafile_path);
+                   const std::filesystem::path &metafile_path);
   ~DummyDepthCamera();
   bool SetUp() override;
 
