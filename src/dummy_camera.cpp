@@ -50,8 +50,10 @@ void DummyColorCamera::set_use_depth_as_world_frame(bool use_depth_as_world_fram
 }
 
 void DummyColorCamera::set_image(const cv::Mat& img){
-  if (img.channels() != 3){
-    std::cerr << "DummyColorCamera::set_image requires a 3-channel color image, provided: " << img.channels() << std::endl;
+  if (img.type() != CV_8UC3){
+    std::string err_msg = "DummyColorCamera::set_image requires a 3-channel 8-bit unsigned int color image, provided: " 
+                          + std::to_string(img.channels()) + " channels and " + std::to_string(img.type()) + " opencv type code";
+    throw std::invalid_argument(err_msg);
   }
   image_ = img;
 }
@@ -170,8 +172,10 @@ void DummyDepthCamera::set_use_color_as_world_frame(
 }
 
 void DummyDepthCamera::set_image(const cv::Mat& img){
-  if (img.channels() != 1){
-    std::cerr << "DummyDepthCamera::set_image requires a 1-channel depth image, provided: " << img.channels() << std::endl;
+  if (img.type() != CV_16UC1){
+    std::string err_msg = "DummyColorCamera::set_image requires a 1-channel 16-bit unsigned int depth image, provided: " 
+                        + std::to_string(img.channels()) + " channels and " + std::to_string(img.type()) + " opencv type code";
+    throw std::invalid_argument(err_msg);
   }
   image_ = img;
 }

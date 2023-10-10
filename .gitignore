@@ -3,3 +3,4 @@ build/
 dist/
 tmp/
 EXAMPLE_RUN.txt
+tests/__pycache__

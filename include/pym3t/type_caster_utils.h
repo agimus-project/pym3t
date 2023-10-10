@@ -41,11 +41,10 @@ namespace pybind11
             {
                 if (py::isinstance<py::array>(src))
                 {
-                    // Did not find a way to check if  incoming array is c-style or f-style
+                    // Did not find a way to check if incoming array is c-style or f-style
                     // Whatever it is, it is possible to enforce a conversion to f_style (without copy if the array is already f_style)
                     py::array_t<Scalar, py::array::f_style | py::array::forcecast> array = src.cast<py::array_t<Scalar>>();
-                    //   py::array_t<Scalar, py::array::c_style | py::array::forcecast> array = src.cast<py::array_t<Scalar>>();
-                    // takes a 4x4 matrix
+                    // only accepts a 4x4 array
                     if (array.ndim() == 2 && array.shape(0) == 4 && array.shape(1) == 4)
                     {
                         py::buffer_info buff_info = array.request();
@@ -72,7 +71,9 @@ namespace pybind11
                                    py::return_value_policy /* policy */,
                                    py::handle /* parent */)
             {
-
+                // Maps the data underlying the eigen object according to ordering convention:
+                // RowMajor -> c_style 
+                // ColumnMajor -> f_style 
                 if (src.matrix().IsRowMajor)
                 {
                     py::array_t<Scalar, py::array::c_style | py::array::forcecast> array({4, 4}, src.data());
