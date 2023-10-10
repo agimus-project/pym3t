@@ -7,7 +7,7 @@ import numpy as np
 import quaternion
 from pathlib import Path
 
-import pyicg
+import pym3t
 
 def inv_SE3(T):
     """
@@ -63,19 +63,19 @@ config_dir = Path(args.config_dir)
 tmp_dir = Path(args.tmp_dir)
 
 
-tracker = pyicg.Tracker('tracker', synchronize_cameras=False)
+tracker = pym3t.Tracker('tracker', synchronize_cameras=False)
 
-renderer_geometry = pyicg.RendererGeometry('renderer geometry')
+renderer_geometry = pym3t.RendererGeometry('renderer geometry')
 
 with open(config_dir / args.camera_file, 'r') as f:
     cam = yaml.load(f.read(), Loader=yaml.UnsafeLoader)
 
-color_camera = pyicg.DummyColorCamera('cam_color')
+color_camera = pym3t.DummyColorCamera('cam_color')
 color_camera.color2depth_pose = tq_to_SE3(cam['trans_d_c'], cam['quat_d_c_xyzw'])
-color_camera.intrinsics = pyicg.Intrinsics(**cam['intrinsics_color'])
+color_camera.intrinsics = pym3t.Intrinsics(**cam['intrinsics_color'])
 
 # Viewers
-color_viewer = pyicg.NormalColorViewer('color_viewer', color_camera, renderer_geometry)
+color_viewer = pym3t.NormalColorViewer('color_viewer', color_camera, renderer_geometry)
 color_viewer.StartSavingImages('tmp', 'png')
 color_viewer.set_opacity(0.5)  # [0.0-1.0]
 color_viewer.display_images = args.display
@@ -88,7 +88,7 @@ geometry_unit_in_meter_ycbv_urdf = 0.001
 metafile_path = models_dir / (args.body_name+'.yaml')
 if metafile_path.exists():
     print('Body metafile_path constructor')
-    body = pyicg.Body(args.body_name, metafile_path.as_posix())
+    body = pym3t.Body(args.body_name, metafile_path.as_posix())
 else:
     print('Body full model path constructor')
     obj_files = list(models_dir.glob('*.obj'))
@@ -97,7 +97,7 @@ else:
     else:
         raise FileNotFoundError('models_dir does not contain <body_name>.yaml or <body_name>.obj file')
     print('obj_path: ', obj_path)
-    body = pyicg.Body(
+    body = pym3t.Body(
         name=args.body_name,
         geometry_path=obj_path.as_posix(),
         geometry_unit_in_meter=geometry_unit_in_meter_ycbv_urdf,
@@ -110,16 +110,16 @@ renderer_geometry.AddBody(body)
 
 # Detector
 detector_path = config_dir / args.detector_file
-detector = pyicg.StaticDetector('static_detector', detector_path.as_posix(), body)
+detector = pym3t.StaticDetector('static_detector', detector_path.as_posix(), body)
 detector.SetUp()  # reads the definition
 # tracker.AddDetector(detector)  # tracker sets up fine even without a detector!
 
 # Models
 region_model_path = tmp_dir / (args.body_name + '_region_model.bin')
-region_model = pyicg.RegionModel(args.body_name + '_region_model', body, region_model_path.as_posix())
+region_model = pym3t.RegionModel(args.body_name + '_region_model', body, region_model_path.as_posix())
 
 # Modalities
-region_modality = pyicg.RegionModality(args.body_name + '_region_modality', body, color_camera, region_model)
+region_modality = pym3t.RegionModality(args.body_name + '_region_modality', body, color_camera, region_model)
 
 
 if args.model_occlusions:
@@ -130,13 +130,13 @@ if args.model_occlusions:
                     -> projection matrix is recomputed each time a new render is done (contrary to FullRender)
     Used for render based occlusion handling.
     """
-    color_depth_renderer = pyicg.FocusedBasicDepthRenderer('color_depth_renderer', renderer_geometry, color_camera)
+    color_depth_renderer = pym3t.FocusedBasicDepthRenderer('color_depth_renderer', renderer_geometry, color_camera)
     color_depth_renderer.AddReferencedBody(body)
 
     region_modality.ModelOcclusions(color_depth_renderer)  # NOT WORKING
 
 
-optimizer = pyicg.Optimizer('optimizer')
+optimizer = pym3t.Optimizer('optimizer')
 optimizer.AddModality(region_modality)
 tracker.AddOptimizer(optimizer)
 

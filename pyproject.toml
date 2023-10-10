@@ -5,7 +5,7 @@ requires = ["scikit-build-core", "pybind11"]
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "pyicg"
+name = "pym3t"
 version = "0.0.1"
 requires-python = ">=3.7"
 # run time dependencies

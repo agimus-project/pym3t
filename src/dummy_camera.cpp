@@ -1,7 +1,7 @@
 
-#include "pyicg/dummy_camera.h"
+#include "pym3t/dummy_camera.h"
 
-namespace icg {
+namespace m3t {
 
 /**
  * Things to manually set in app code:
@@ -252,4 +252,4 @@ bool DummyDepthCamera::LoadMetaData() {
   return true;
 }
 
-}  // namespace icg
+}  // namespace m3t

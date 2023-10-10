@@ -1,12 +1,12 @@
-A python wrapper around ICG tracker from https://github.com/DLR-RM/3DObjectTracking/tree/master, __WIP__
+A python wrapper around M3T tracker from https://github.com/DLR-RM/3DObjectTracking/tree/master, __WIP__
 
 # Installation
 
-`git clone git@github.com:MedericFourmy/pyicg.git --recursive`
+`git clone git@github.com:MedericFourmy/pym3t.git --recursive`
 
 Install dependencies:  
-`conda create -n pyicg`  
-`conda activate pyicg`  
+`conda create -n pym3t`  
+`conda activate pym3t`  
 `mamba env update --file environment.yaml`
 
 Then  
@@ -18,7 +18,7 @@ As example of usage of the library, scripts are provided: `run_image_per_image_c
 ## Setup a tracking sequence 
 
 To run the examples as is, you should have:
-* A directory `<obj_dir>` containing the `<object_name>.obj` object file model
+* A directory `<obj_dir>` containing the `<object_name>.obj` object file model (M3T only works with .obj models)
 * In `<obj_dir>`, a `<object_name>.yaml` file similar to the `banana.yaml' example in config directory. The "object_name" need to match with .obj file.
 * A sequence of color (and optionally depth) images stored in the `<images_dir>` directory with following conventions (using default opencv formats):
   * Color images should be 8-bit BGR, file name starting with `bgr`

@@ -7,7 +7,7 @@ import numpy as np
 import quaternion
 from pathlib import Path
 
-import pyicg
+import pym3t
 
 def inv_SE3(T):
     """
@@ -69,50 +69,51 @@ nb_img_load = args.nb_img_load
 stop = args.stop
 
 
-tracker = pyicg.Tracker('tracker', synchronize_cameras=False)
+tracker = pym3t.Tracker('tracker', synchronize_cameras=False)
 
-renderer_geometry = pyicg.RendererGeometry('renderer geometry')
+renderer_geometry = pym3t.RendererGeometry('renderer geometry')
 
 with open(config_dir / camera_file, 'r') as f:
     cam = yaml.load(f.read(), Loader=yaml.UnsafeLoader)
 
-color_camera = pyicg.DummyColorCamera('cam_color')
+color_camera = pym3t.DummyColorCamera('cam_color')
 color_camera.color2depth_pose = tq_to_SE3(cam['trans_d_c'], cam['quat_d_c_xyzw'])
-color_camera.intrinsics = pyicg.Intrinsics(**cam['intrinsics_color'])
+color_camera.intrinsics = pym3t.Intrinsics(**cam['intrinsics_color'])
 
-depth_camera = pyicg.DummyDepthCamera('cam_depth')
+depth_camera = pym3t.DummyDepthCamera('cam_depth')
 depth_camera.depth2color_pose = inv_SE3(color_camera.color2depth_pose)
-depth_camera.intrinsics = pyicg.Intrinsics(**cam['intrinsics_depth'])
+depth_camera.intrinsics = pym3t.Intrinsics(**cam['intrinsics_depth'])
 
 # Viewers
-color_viewer = pyicg.NormalColorViewer('color_viewer', color_camera, renderer_geometry)
+color_viewer = pym3t.NormalColorViewer('color_viewer', color_camera, renderer_geometry)
 # color_viewer.StartSavingImages('tmp', 'bmp')
 color_viewer.set_opacity(0.5)  # [0.0-1.0]
-depth_viewer = pyicg.NormalDepthViewer('depth_viewer', depth_camera, renderer_geometry)
+depth_viewer = pym3t.NormalDepthViewer('depth_viewer', depth_camera, renderer_geometry)
 tracker.AddViewer(depth_viewer)
 tracker.AddViewer(color_viewer)
 
 
 # Bodies
 metafile_path = models_dir / (body_name+'.yaml')
-body = pyicg.Body(body_name, metafile_path.as_posix())
+body = pym3t.Body(body_name, metafile_path.as_posix())
 renderer_geometry.AddBody(body)
 
 # Detector
 detector_path = config_dir / detector_file
-detector = pyicg.StaticDetector('static_detector', detector_path.as_posix(), body)
+detector = pym3t.StaticDetector('static_detector', detector_path.as_posix(), body)
 tracker.AddDetector(detector)
 
 # Models
 region_model_path = tmp_dir / (body_name + '_region_model.bin')
-region_model = pyicg.RegionModel(body_name + '_region_model', body, region_model_path.as_posix())
+region_model = pym3t.RegionModel(body_name + '_region_model', body, region_model_path.as_posix())
 depth_model_path = tmp_dir / (body_name + '_depth_model.bin')
-depth_model = pyicg.DepthModel(body_name + '_depth_model', body, depth_model_path.as_posix())
+depth_model = pym3t.DepthModel(body_name + '_depth_model', body, depth_model_path.as_posix())
 
 # Modalities
-region_modality = pyicg.RegionModality(body_name + '_region_modality', body, color_camera, region_model)
-depth_modality = pyicg.DepthModality(body_name + '_depth_modality', body, depth_camera, depth_model)
+region_modality = pym3t.RegionModality(body_name + '_region_modality', body, color_camera, region_model)
+depth_modality = pym3t.DepthModality(body_name + '_depth_modality', body, depth_camera, depth_model)
 
+#
 
 
 
@@ -125,8 +126,8 @@ if model_occlusions:
     Used for render based occlusion handling.
     """
     # We need 2 renderers because depth and color are slightly not aligned
-    color_depth_renderer = pyicg.FocusedBasicDepthRenderer('color_depth_renderer', renderer_geometry, color_camera)
-    depth_depth_renderer = pyicg.FocusedBasicDepthRenderer('depth_depth_renderer', renderer_geometry, depth_camera)
+    color_depth_renderer = pym3t.FocusedBasicDepthRenderer('color_depth_renderer', renderer_geometry, color_camera)
+    depth_depth_renderer = pym3t.FocusedBasicDepthRenderer('depth_depth_renderer', renderer_geometry, depth_camera)
     color_depth_renderer.AddReferencedBody(body)
     depth_depth_renderer.AddReferencedBody(body)
 
@@ -134,7 +135,7 @@ if model_occlusions:
     depth_modality.ModelOcclusions(depth_depth_renderer)
 
 
-optimizer = pyicg.Optimizer(body_name+'_optimizer')
+optimizer = pym3t.Optimizer(body_name+'_optimizer')
 optimizer.AddModality(region_modality)
 if use_depth:
     optimizer.AddModality(depth_modality)

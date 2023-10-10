@@ -1,17 +1,17 @@
 
-#ifndef ICG_INCLUDE_ICG_dummy_camera_H_
-#define ICG_INCLUDE_ICG_dummy_camera_H_
+#ifndef M3t_INCLUDE_M3t_dummy_camera_H_
+#define M3t_INCLUDE_M3t_dummy_camera_H_
 
 #include <filesystem/filesystem.h>
-#include <icg/camera.h>
-#include <icg/common.h>
+#include <m3t/camera.h>
+#include <m3t/common.h>
 
 #include <chrono>
 #include <iostream>
 #include <mutex>
 #include <opencv2/opencv.hpp>
 
-namespace icg {
+namespace m3t {
 
 
 /**
@@ -109,6 +109,6 @@ class DummyDepthCamera : public DepthCamera {
   Transform3fA depth2color_pose_{Transform3fA::Identity()};
 };
 
-}  // namespace icg
+}  // namespace m3t
 
-#endif  // ICG_INCLUDE_ICG_dummy_camera_H_
+#endif  // M3t_INCLUDE_M3t_dummy_camera_H_
