@@ -19,19 +19,14 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: pym3t
+          environment-file: environment.yaml
           python-version: ${{ matrix.python-version }}
           miniforge-variant: Mambaforge
           miniforge-version: latest
           use-mamba: true
-
-      - name: Update conda environment with pym3t dependencies
-        run:
-          mamba env update -n pym3t -f environment.yml
-
       - name: Install pym3t
         run: |
           pip install .
-
       - name: Run tests
         run: |
           pip install pytest
