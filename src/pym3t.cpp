@@ -242,6 +242,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
                       "free_directions"_a=std::array<bool, 6>({true, true, true, true, true, true}), "fixed_body2joint_pose"_a=true)
         .def(py::init<const std::string &, const std::filesystem::path &, const std::shared_ptr<Body> &>(), "name"_a, "metafile_path"_a, "body_ptr"_a)
         .def("AddModality", &Link::AddModality)
+        .def_property("link2world_pose", &Link::link2world_pose, &Link::set_link2world_pose)
     ;
     
 
@@ -374,6 +375,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
 
         .def_property("n_points_max", &DepthModality::n_points_max, &DepthModality::set_n_points_max)
         .def_property("use_adaptive_coverage", &DepthModality::use_adaptive_coverage, &DepthModality::set_use_adaptive_coverage)
+        .def_property("reference_surface_area", &DepthModality::reference_surface_area, &DepthModality::set_reference_surface_area)
         .def_property("stride_length", &DepthModality::stride_length, &DepthModality::set_stride_length)
         .def_property("considered_distances", &DepthModality::considered_distances, &DepthModality::set_considered_distances)
         .def_property("standard_deviations", &DepthModality::standard_deviations, &DepthModality::set_standard_deviations)
