@@ -10,7 +10,8 @@
 #include <pybind11/eigen.h>
 #include <pybind11/chrono.h>
 #include <pybind11/stl/filesystem.h>
-// ICG
+
+// M3T
 #include <m3t/common.h>
 #include <m3t/camera.h>
 #include <m3t/realsense_camera.h>
@@ -28,13 +29,12 @@
 #include <m3t/static_detector.h>
 #include <m3t/tracker.h>
 
-// // pym3t
+// pym3t
 #include "pym3t/type_caster_utils.h"
 #include "pym3t/dummy_camera.h"
 
 namespace py = pybind11;
-// to be able to use "arg"_a shorthand
-using namespace pybind11::literals;
+using namespace pybind11::literals;  // to use "arg"_a shorthand
 using namespace m3t;
 using namespace Eigen;
 
@@ -47,10 +47,7 @@ using namespace Eigen;
 
 PYBIND11_MODULE(_pym3t_mod, m) {
 
-    ///////////////////////
-    // Classes
-    ///////////////////////
-
+    // Tracker: main interface with m3t
     py::class_<Tracker>(m, "Tracker")
         .def(py::init<const std::string, int, int, bool, bool,
                       const std::chrono::milliseconds&, int, int>(), 
@@ -73,7 +70,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def_property("n_update_iterations", &Tracker::n_update_iterations, &Tracker::set_n_update_iterations)
         ;
 
-
+    //--------------------------//
 
     // Stores camera intrinsics parameters
     py::class_<Intrinsics>(m, "Intrinsics")
@@ -91,7 +88,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .value("REGION", IDType::REGION)
         .export_values();
 
-    ///
+    // Handling abstract class Camera
     class PyCamera: public Camera {
         public:
             // Inherit the base class constructor
@@ -146,6 +143,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def_property("depth_scale", &DummyDepthCamera::depth_scale, &DummyDepthCamera::set_depth_scale)
         ;
 
+    //--------------------------//
 
     // RendererGeometry
     py::class_<RendererGeometry, std::shared_ptr<RendererGeometry>>(m, "RendererGeometry")
@@ -155,7 +153,9 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def("ClearBodies", &RendererGeometry::ClearBodies)
         ;
 
-    ///
+    //--------------------------//
+
+    // Handling abstract classes Viewer
     class PyViewer: public Viewer {
         public:
             // Inherit the base class constructor
@@ -168,7 +168,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
                 PYBIND11_OVERRIDE_PURE( bool, Viewer, UpdateViewer, save_index);}
     };
 
-    // Viewer
+    // Viewer -> not constructible, just to enable automatic downcasting and binding of child classes
     py::class_<Viewer, PyViewer, std::shared_ptr<Viewer>>(m, "Viewer")
         .def("StartSavingImages", &PyViewer::StartSavingImages, "save_directory"_a, "save_image_type"_a)
         .def("StopSavingImages", &PyViewer::StopSavingImages)
@@ -191,23 +191,26 @@ PYBIND11_MODULE(_pym3t_mod, m) {
                       "name"_a, "depth_camera_ptr"_a, "renderer_geometry_ptr"_a, "min_depth"_a=0.0f, "max_depth"_a=1.0f, "opacity"_a=0.5f)
         ;
 
-    /**
-     * Renderers for occlusion handling
-     * */ 
-    py::class_<FocusedBasicDepthRenderer, std::shared_ptr<FocusedBasicDepthRenderer>>(m, "FocusedBasicDepthRenderer")
-        // .def(py::init<const std::string &, const std::shared_ptr<RendererGeometry> &, const Transform3fA &, const Intrinsics &, int, float, float>(),
-        //               "name"_a, "renderer_geometry_ptr"_a, "world2camera_pose"_a, "intrinsics"_a, "image_size"_a=200, "z_min"_a=0.01f, "z_max"_a=5.0f)       
+    // Handling abstract class FocusedDepthRenderer
+    class PyFocusedDepthRenderer: public FocusedDepthRenderer {
+        public:
+            // Inherit the base class constructor
+            using FocusedDepthRenderer::FocusedDepthRenderer;
+    };
+
+    // FocusedDepthRenderer -> not constructible, just to enable automatic downcasting and binding of child classes
+    py::class_<FocusedDepthRenderer, PyFocusedDepthRenderer, std::shared_ptr<FocusedDepthRenderer>>(m, "FocusedDepthRenderer");
+
+
+    //FocusedBasicDepthRenderer -> Renderer for occlusion handling
+    py::class_<FocusedBasicDepthRenderer, FocusedDepthRenderer, std::shared_ptr<FocusedBasicDepthRenderer>>(m, "FocusedBasicDepthRenderer")
         .def(py::init<const std::string &, const std::shared_ptr<RendererGeometry> &, const std::shared_ptr<Camera> &, int, float, float>(),
                       "name"_a, "renderer_geometry_ptr"_a, "camera_ptr"_a, "image_size"_a=200, "z_min"_a=0.01f, "z_max"_a=5.0f)
         .def("AddReferencedBody", &FocusedBasicDepthRenderer::AddReferencedBody)
         ;
 
-    /**
-     * Renderer for TextureModality
-     * */ 
+    //FocusedSilhouetteRenderer -> Renderer for TextureModality
     py::class_<FocusedSilhouetteRenderer, std::shared_ptr<FocusedSilhouetteRenderer>>(m, "FocusedSilhouetteRenderer")
-        // .def(py::init<const std::string &, const std::shared_ptr<RendererGeometry> &, const Transform3fA &, const Intrinsics &, IDType, int, float, float>(),
-        //               "name"_a, "renderer_geometry_ptr"_a, "world2camera_pose"_a, "intrinsics"_a, "id_type"_a=IDType::BODY, "image_size"_a=200 "z_min"_a=0.01f, "z_max"_a=5.0f)       
         .def(py::init<const std::string &, const std::shared_ptr<RendererGeometry> &, const std::shared_ptr<Camera>&, IDType, int, float, float>(),
                       "name"_a, "renderer_geometry_ptr"_a, "camera_ptr"_a, "id_type"_a=IDType::BODY, "image_size"_a=200, "z_min"_a=0.01f, "z_max"_a=5.0f)       
         .def(py::init<const std::string &, const std::filesystem::path&, const std::shared_ptr<RendererGeometry> &, const std::shared_ptr<Camera>&>(),
@@ -215,7 +218,8 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def("AddReferencedBody", &FocusedSilhouetteRenderer::AddReferencedBody)
         ;
 
-
+    //--------------------------//
+    
     // Body
     py::class_<Body, std::shared_ptr<Body>>(m, "Body")
       // Constructors and initialization methods
@@ -233,6 +237,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def_property("world2body_pose", &Body::world2body_pose, &Body::set_world2body_pose)
         ;
 
+    // Link
     py::class_<Link, std::shared_ptr<Link>>(m, "Link")
         .def(py::init<const std::string &, const std::shared_ptr<Body> &, 
                       const Transform3fA &, const Transform3fA &, const Transform3fA &, 
@@ -241,12 +246,16 @@ PYBIND11_MODULE(_pym3t_mod, m) {
                       "body2joint_pose"_a=Transform3fA::Identity(), "joint2parent_pose"_a=Transform3fA::Identity(), "link2world_pose"_a=Transform3fA::Identity(),
                       "free_directions"_a=std::array<bool, 6>({true, true, true, true, true, true}), "fixed_body2joint_pose"_a=true)
         .def(py::init<const std::string &, const std::filesystem::path &, const std::shared_ptr<Body> &>(), "name"_a, "metafile_path"_a, "body_ptr"_a)
-        .def("AddModality", &Link::AddModality)
         .def_property("link2world_pose", &Link::link2world_pose, &Link::set_link2world_pose)
+        .def("AddModality", &Link::AddModality)
+        .def("gradient", &Link::gradient)
+        .def("hessian", &Link::hessian)
+        .def("jacobian", &Link::jacobian)
     ;
     
+    //--------------------------//
 
-    ///
+    // Handling abstract class Detector
     class PyDetector: public Detector {
         public:
             // Inherit the base class constructor
@@ -254,17 +263,13 @@ PYBIND11_MODULE(_pym3t_mod, m) {
 
             bool SetUp() override {
                 PYBIND11_OVERRIDE_PURE( bool, Detector, SetUp);}
-
-            // bool DetectBody() override {
-            //     PYBIND11_OVERRIDE_PURE( bool, Detector, DetectBody);}
     };
 
     // Detector
     py::class_<Detector, PyDetector, std::shared_ptr<Detector>>(m, "Detector");
 
-    // StaticDetector
+    // StaticDetector -> not constructible, just to enable automatic downcasting and binding of child classes
     py::class_<StaticDetector, Detector, std::shared_ptr<StaticDetector>>(m, "StaticDetector")
-      // Constructor and setup method
         .def(py::init<const std::string &, const std::shared_ptr<Optimizer> &, const Transform3fA &, bool>(),
                       "name"_a, "optimizer_ptr"_a, "link2world_pose"_a, "reset_joint_poses"_a)
         .def(py::init<const std::string &, const std::filesystem::path &, const std::shared_ptr<Optimizer> &>(),
@@ -273,6 +278,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def_property("link2world_pose_", &StaticDetector::link2world_pose, &StaticDetector::set_link2world_pose)
         ;
 
+    //--------------------------//
 
     // RegionModel
     py::class_<RegionModel, std::shared_ptr<RegionModel>>(m, "RegionModel")
@@ -290,9 +296,9 @@ PYBIND11_MODULE(_pym3t_mod, m) {
                       "sphere_radius"_a=0.8f, "n_divides"_a=4, "n_points_max"_a=200, "max_radius_depth_offset"_a=0.05f, "stride_depth_offset"_a=0.002f, "use_random_seed"_a=false, "image_size"_a=2000)
         ;
 
-
-
-    ///
+    //--------------------------//
+    
+    // Handling abstract class Modality
     class PyModality: public Modality {
         public:
             // Inherit the base class constructor
@@ -314,9 +320,9 @@ PYBIND11_MODULE(_pym3t_mod, m) {
                 PYBIND11_OVERRIDE_PURE(bool, Modality, CalculateResults, iteration);}
             bool VisualizeResults(int save_idx) override {
                 PYBIND11_OVERRIDE_PURE(bool, Modality, VisualizeResults, save_idx);}
-
     };
 
+    // Modality -> not constructible, just to enable automatic downcasting and binding of child classes
     py::class_<Modality, PyModality, std::shared_ptr<Modality>>(m, "Modality");
 
     // RegionModality
@@ -415,14 +421,10 @@ PYBIND11_MODULE(_pym3t_mod, m) {
     py::class_<Optimizer, std::shared_ptr<Optimizer>>(m, "Optimizer")
         .def(py::init<const std::string &, const std::shared_ptr<Link> &, float, float>(),
                       "name"_a, "root_link_ptr"_a, "tikhonov_parameter_rotation"_a=1000.0f, "tikhonov_parameter_translation"_a=30000.0f)
-        // .def(py::init<const std::string &, const std::filesystem::path &, const std::shared_ptr<Link> &>(),
-        //               "name"_a, "metafile_path"_a "root_link_ptr"_a)
         .def_property("name", &Optimizer::name, &Optimizer::set_name)
         .def_property("metafile_path", &Optimizer::metafile_path, &Optimizer::set_metafile_path)
         .def_property("tikhonov_parameter_rotation", &Optimizer::tikhonov_parameter_rotation, &Optimizer::set_tikhonov_parameter_rotation)
         .def_property("tikhonov_parameter_translation", &Optimizer::tikhonov_parameter_translation, &Optimizer::set_tikhonov_parameter_translation)
         ;
 
-}   
-
-
+}
