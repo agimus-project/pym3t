@@ -181,9 +181,9 @@ print(tracker.n_update_iterations)
 SLEEP = int(1000/30)  # frames at 30 Hz
 
 # Simulate one iteration of Tracker::RunTrackerProcess for loop
-for iter, (img_bgr, img_depth) in enumerate(zip(img_bgr_lst, img_depth_lst)):
+for i, (img_bgr, img_depth) in enumerate(zip(img_bgr_lst, img_depth_lst)):
     t1 = time.time()
-    print('Iter: ', iter)
+    print('Iteration: ', i)
     # 1) Update camera image -> replaces a call to the camera UpdateImage method (which does nothing for Dummy(Color|Depth)Camera) 
     color_camera.image = img_bgr
     depth_camera.image = img_depth
@@ -191,21 +191,23 @@ for iter, (img_bgr, img_depth) in enumerate(zip(img_bgr_lst, img_depth_lst)):
     if not ok:
         raise ValueError('Something is wrong with the provided images')
 
-    if iter == 0:
+    if i == 0:
         # 2) Use external init to update initial object pose
         body.body2world_pose = link2world_pose  # simulate external initial pose
         # link.link2world_pose = link2world_pose  # no effect
         
     # 3) One tracking cycle
     t = time.time()
-    tracker.ExecuteTrackingStep(iter)
+    tracker.ExecuteTrackingStep(i)
     print('ExecuteTrackingCycle (ms)', 1000*(time.time() - t))
     print(link.link2world_pose)
 
     # 4) Render results
     t = time.time()
-    tracker.UpdateViewers(iter)
-    print('UpdateViewers (ms)', 1000*(time.time() - t))
+    color_viewer.UpdateViewer(i)
+    if args.use_depth and args.use_depth_viewer:
+        depth_viewer.UpdateViewer(i)
+    print('Updating viewers took (ms)', 1000*(time.time() - t))
     
     if args.stop_at_each_img:
         k = cv2.waitKey(0)
