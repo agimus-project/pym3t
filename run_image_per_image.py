@@ -67,10 +67,6 @@ tmp_dir.mkdir(exist_ok=True)
 # synchronize_cameras: to be able to print elapsed time
 tracker = pym3t.Tracker('tracker', synchronize_cameras=False)
 renderer_geometry = pym3t.RendererGeometry('renderer geometry')
-color_camera = pym3t.RealSenseColorCamera('realsense_color')
-if args.use_depth:
-    depth_camera = pym3t.RealSenseDepthCamera('realsense_depth')
-
 
 with open(args.cam_path, 'r') as f:
     cam = yaml.load(f.read(), Loader=yaml.UnsafeLoader)
@@ -169,6 +165,7 @@ depth_names = sorted(glob.glob((imgs_dir / 'depth*').as_posix()))
 color_names = color_names[:args.nb_img_load]
 depth_names = depth_names[:args.nb_img_load]
 print(f'{len(color_names)} images to load')
+print('Press q to quit during execution')
 
 # load images from disk
 color_read_flags = cv2.IMREAD_COLOR + cv2.IMREAD_ANYDEPTH
@@ -181,8 +178,11 @@ tracker.n_update_iterations = 5
 print(tracker.n_corr_iterations)
 print(tracker.n_update_iterations)
 
+SLEEP = int(1000/30)  # frames at 30 Hz
+
 # Simulate one iteration of Tracker::RunTrackerProcess for loop
 for iter, (img_bgr, img_depth) in enumerate(zip(img_bgr_lst, img_depth_lst)):
+    t1 = time.time()
     print('Iter: ', iter)
     # 1) Update camera image -> replaces a call to the camera UpdateImage method (which does nothing for Dummy(Color|Depth)Camera) 
     color_camera.image = img_bgr
@@ -194,7 +194,7 @@ for iter, (img_bgr, img_depth) in enumerate(zip(img_bgr_lst, img_depth_lst)):
     if iter == 0:
         # 2) Use external init to update initial object pose
         body.body2world_pose = link2world_pose  # simulate external initial pose
-        # link.link2world_pose = link2world_pose  # simulate external initial pose
+        # link.link2world_pose = link2world_pose  # no effect
         
     # 3) One tracking cycle
     t = time.time()
@@ -206,7 +206,12 @@ for iter, (img_bgr, img_depth) in enumerate(zip(img_bgr_lst, img_depth_lst)):
     t = time.time()
     tracker.UpdateViewers(iter)
     print('UpdateViewers (ms)', 1000*(time.time() - t))
-
+    
     if args.stop_at_each_img:
-        cv2.waitKey(0)
-
+        k = cv2.waitKey(0)
+    else:
+        delay = time.time() - t1
+        sleep = max(1, SLEEP - int(1000*delay))
+        k = cv2.waitKey(sleep)
+    if k == ord('q'):
+        break
