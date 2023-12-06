@@ -30,8 +30,11 @@ Color + depth:
 python run_image_per_image.py --use_region --use_depth -b obj_000014 -m <path/to/obj/dir> -i <path/to/image/dir> -c config/cam_d435_640.yaml -n 10 -s
 ```
 
-Explore options  
-`python run_image_per_image.py -h`
+## Running with webcam
+To bypass camera calibration, a reasonable horizontal fov (~50-70 degrees) can be assumed to get camera intrinsics
+```
+python run_webcam.py --use_region -b obj_000014 -m <path/to/obj/dir>
+```
 
 ## Running realsense camera example script
 ----
