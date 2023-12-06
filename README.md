@@ -1,10 +1,10 @@
-A python wrapper around M3T tracker from https://github.com/DLR-RM/3DObjectTracking/tree/master, __WIP__
+A python wrapper around M3T tracker from https://github.com/DLR-RM/3DObjectTracking/tree/master
 
 # Installation
 
 `git clone git@github.com:MedericFourmy/pym3t.git --recursive`
 
-Install dependencies:  
+Install dependencies with conda:  
 `conda create -n pym3t`  
 `conda activate pym3t`  
 `mamba env update --file environment.yaml`
@@ -13,40 +13,35 @@ Then
 `pip install .`
 
 # Example scripts
-As example of usage of the library, scripts are provided: `run_image_per_image_color.py` and `run_image_per_image_color_depth.py` run single object tracking.
+As example of usage of the library, scripts are provided: 
+* `run_image_per_image.py`: reads color and depth imges from filesystem
+* `run_on_camera_sequence_realsense.py`: run single object tracking with realsense camera
 
-## Setup a tracking sequence 
 
-To run the examples as is, you should have:
-* A directory `<obj_dir>` containing the `<object_name>.obj` object file model (M3T only works with .obj models)
-* In `<obj_dir>`, a `<object_name>.yaml` file similar to the `banana.yaml' example in config directory. The "object_name" need to match with .obj file.
-* A sequence of color (and optionally depth) images stored in the `<images_dir>` directory with following conventions (using default opencv formats):
-  * Color images should be 8-bit BGR, file name starting with `bgr`
-  * Depth images should be 16-bit grayscale, file name starting with `depth`
-* A `static_detector.yaml` in the config directory (default is `./config/`) following. This sets the initial pose from camera to object. 
-
-## Running the examples
+## Running image per image example script
 ----
-
 Color only:   
 ```
-python3 run_image_per_image_color.py -b <object_name> -m <obj_dir> -i <images_dir>
+python run_image_per_image.py --use_region --use_depth --use_texture -b obj_000014 -m <path/to/obj/dir> -i <path/to/image/dir> -c config/cam_d435_640.yaml -n 10 -s
 ```
 
 Color + depth:   
 ```
-python3 run_image_per_image_color_depth.py -b <object_name> -m <obj_dir> -i <images_dir>
+python run_image_per_image.py --use_region --use_depth -b obj_000014 -m <path/to/obj/dir> -i <path/to/image/dir> -c config/cam_d435_640.yaml -n 10 -s
 ```
 
-With a realsense camera plugged:
-```
-python3 run_on_camera_sequence_realsense.py -b <object_name> -m <obj_dir> 
-```
+Explore options  
+`python run_image_per_image.py -h`
 
-Check the options with `-h` argument.
-
-TODO
+## Running realsense camera example script
 ----
-* Make sure compilation is done with RELEASE flag
-* `pip install -e .` not working
-* Check https://github.com/scikit-build/scikit-build/issues/479#issuecomment-1502585979
+Color only:   
+```
+python run_on_camera_sequence_realsense.py --use_region -b obj_000014 -m <path/to/obj/dir>
+```
+
+----
+Color + depth:   
+```
+python run_on_camera_sequence_realsense.py --use_region --use_depth -b obj_000014 -m <path/to/obj/dir>
+```
