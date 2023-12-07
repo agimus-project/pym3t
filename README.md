@@ -13,28 +13,32 @@ Then
 # Example scripts
 As example of usage of the library, scripts are provided: 
 * `run_image_per_image.py`: single object tracking using color and depth images from filesystem
-* `run_on_camera_sequence_realsense.py`: single object tracking with realsense camera
 * `run_webcam.py`: single object tracking with first camera device detected by the system (webcam or other usb camera usually)
+* `run_on_camera_sequence_realsense.py`: single object tracking with realsense camera
 
-For all examples, you need a object mesh stored in the wavefront .obj format. Upon first execution, a set of sparve template views are generated which can take some time.
+:question:: check available options with `python <script>.py -h`
+
+For all examples, you need a object mesh in the wavefront .obj format with name <object_id>.obj. Upon first execution, a set of sparse template views are generated which can take some time.
 
 ## Running image per image  
 ----
-For this example you need a set of of recorded sequential color (and depth) images stored in a directory 
-as well as calibrated camera intrinsics in the formate described in config/cam_d435_640.yaml.
+For this example you need a set of of recorded sequential color (and potentially depth) images stored in a directory.
+The color images `color*.png` and `depth*.png` need have names with lexicographic order (e.g. color_000000.png, color_000001.png, color_000002.png...)
+Calibrated camera intrinsics in the formate described in config/cam_d435_640.yaml also need to be provided.
+
 Color only:   
 ```
-python run_image_per_image.py --use_region --use_depth --use_texture -b obj_000014 -m <path/to/obj/dir> -i <path/to/image/dir> -c config/cam_d435_640.yaml -n 10 -s
+python run_image_per_image.py --use_region -b obj_000014 -m <path/to/obj/dir> -i <path/to/image/dir> -c config/cam_d435_640.yaml --stop
 ```
 
 Color + depth:   
 ```
-python run_image_per_image.py --use_region --use_depth -b obj_000014 -m <path/to/obj/dir> -i <path/to/image/dir> -c config/cam_d435_640.yaml -n 10 -s
+python run_image_per_image.py --use_region --use_depth -b obj_000014 -m <path/to/obj/dir> -i <path/to/image/dir> -c config/cam_d435_640.yaml --stop
 ```
 
 Keyboard commands:
 - `q`: exit
-- `any other key`: When running with --stop=-s argument, continue to next image
+- `any other key`: When running with --stop/-s argument, continue to next image
 
 ## Running with webcam
 To bypass camera calibration, a reasonable horizontal fov (~50-70 degrees) can be assumed to get camera intrinsics
@@ -44,8 +48,8 @@ python run_webcam.py --use_region -b obj_000014 -m <path/to/obj/dir>
 
 Keyboard commands:
 - `q`: exit
-- `d`: initialize object pose
-- `x`: start tracking
+- `d`: reset object pose to initial guess
+- `x`: start/restart tracking
 
 ## Running with realsense camera
 ----
@@ -63,4 +67,4 @@ python run_on_camera_sequence_realsense.py --use_region --use_depth -b obj_00001
 Keyboard commands:
 - `q`: exit
 - `d`: initialize object pose
-- `x`: start tracking
+- `x`: start/restart tracking

@@ -89,6 +89,7 @@ if args.use_depth and args.use_depth_viewer:
 
 # Setup body model and properties
 obj_model_path = Path(args.models_dir) / f'{args.body_name}.obj'
+if not obj_model_path.exists(): raise ValueError(f'{obj_model_path} is a wrong path')
 print(f'Loading object {obj_model_path}')
 body = pym3t.Body(
     name=args.body_name,
@@ -169,9 +170,7 @@ depth_names = sorted(glob.glob((imgs_dir / 'depth*').as_posix()))
 # LIMIT nb images
 color_names = color_names[:args.nb_img_load]
 depth_names = depth_names[:args.nb_img_load]
-print(f'{len(color_names)} images to load')
-print('\n------\nPress q to quit during execution')
-print('Press any key to step to next image')
+print(f'Loading {len(color_names)} images...')
 
 # load images from disk
 color_read_flags = cv2.IMREAD_COLOR + cv2.IMREAD_ANYDEPTH
@@ -185,6 +184,10 @@ print(tracker.n_corr_iterations)
 print(tracker.n_update_iterations)
 
 SLEEP = int(1000/30)  # frames at 30 Hz
+
+print('\n------\nPress q to quit during execution')
+print('Press any other key to step to next image')
+
 
 # Simulate one iteration of Tracker::RunTrackerProcess for loop
 for i, (img_bgr, img_depth) in enumerate(zip(img_bgr_lst, img_depth_lst)):
@@ -206,6 +209,7 @@ for i, (img_bgr, img_depth) in enumerate(zip(img_bgr_lst, img_depth_lst)):
     t = time.time()
     tracker.ExecuteTrackingStep(i)
     print('ExecuteTrackingCycle (ms)', 1000*(time.time() - t))
+    print('link.link2world_pose')
     print(link.link2world_pose)
 
     # 4) Render results

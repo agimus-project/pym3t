@@ -50,6 +50,7 @@ if args.use_depth and args.use_depth_viewer:
 
 # Setup body model and properties
 obj_model_path = Path(args.models_dir) / f'{args.body_name}.obj'
+if not obj_model_path.exists(): raise ValueError(f'{obj_model_path} is a wrong path')
 print(f'Loading object {obj_model_path}')
 body = pym3t.Body(
     name=args.body_name,

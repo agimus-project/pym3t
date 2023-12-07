@@ -87,6 +87,7 @@ tracker.AddViewer(color_viewer)
 
 # Setup body model and properties
 obj_model_path = Path(args.models_dir) / f'{args.body_name}.obj'
+if not obj_model_path.exists(): raise ValueError(f'{obj_model_path} is a wrong path')
 print(f'Loading object {obj_model_path}')
 body = pym3t.Body(
     name=args.body_name,
@@ -132,7 +133,7 @@ tracker.AddOptimizer(optimizer)
 # Intialize object pose
 link2world_pose = np.array([ 1, 0,  0, 0,
                              0, 0, -1, 0,
-                             0, 1,  0, 0.556,
+                             0, 1,  0, 0.456,
                              0, 0,  0, 1 ]).reshape((4,4))
 dR_l = quaternion.as_rotation_matrix(quaternion.from_rotation_vector([0.2,0,0.0]))
 link2world_pose[:3,:3] = link2world_pose[:3,:3] @ dR_l
