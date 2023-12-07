@@ -12,9 +12,9 @@ Then
 
 # Example scripts
 As example of usage of the library, scripts are provided: 
-* `run_image_per_image.py`: single object tracking using color and depth images from filesystem
-* `run_webcam.py`: single object tracking with first camera device detected by the system (webcam or other usb camera usually)
-* `run_on_camera_sequence_realsense.py`: single object tracking with realsense camera
+* `run_image_dir_example.py`: single object tracking using color and depth images from filesystem
+* `run_webcam_example.py`: single object tracking with first camera device detected by the system (webcam or other usb camera usually)
+* `run_realsense_example.py`: single object tracking with realsense camera
 
 :question:: check available options with `python <script>.py -h`
 
@@ -28,12 +28,12 @@ Calibrated camera intrinsics in the formate described in config/cam_d435_640.yam
 
 Color only:   
 ```
-python run_image_per_image.py --use_region -b obj_000014 -m <path/to/obj/dir> -i <path/to/image/dir> -c config/cam_d435_640.yaml --stop
+python run_image_dir_example.py --use_region -b obj_000014 -m <path/to/obj/dir> -i <path/to/image/dir> -c config/cam_d435_640.yaml --stop
 ```
 
 Color + depth:   
 ```
-python run_image_per_image.py --use_region --use_depth -b obj_000014 -m <path/to/obj/dir> -i <path/to/image/dir> -c config/cam_d435_640.yaml --stop
+python run_image_dir_example.py --use_region --use_depth -b obj_000014 -m <path/to/obj/dir> -i <path/to/image/dir> -c config/cam_d435_640.yaml --stop
 ```
 
 Keyboard commands:
@@ -43,7 +43,7 @@ Keyboard commands:
 ## Running with webcam
 To bypass camera calibration, a reasonable horizontal fov (~50-70 degrees) can be assumed to get camera intrinsics
 ```
-python run_webcam.py --use_region -b obj_000014 -m <path/to/obj/dir>
+python run_webcam_example.py --use_region -b obj_000014 -m <path/to/obj/dir>
 ```
 
 Keyboard commands:
@@ -55,13 +55,13 @@ Keyboard commands:
 ----
 Color only:   
 ```
-python run_on_camera_sequence_realsense.py --use_region -b obj_000014 -m <path/to/obj/dir>
+python run_realsense_example.py --use_region -b obj_000014 -m <path/to/obj/dir>
 ```
 
 ----
 Color + depth:   
 ```
-python run_on_camera_sequence_realsense.py --use_region --use_depth -b obj_000014 -m <path/to/obj/dir>
+python run_realsense_example.py --use_region --use_depth -b obj_000014 -m <path/to/obj/dir>
 ```
 
 Keyboard commands:
