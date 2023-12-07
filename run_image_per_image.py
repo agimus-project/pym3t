@@ -87,6 +87,7 @@ if args.use_depth and args.use_depth_viewer:
     depth_viewer = pym3t.NormalDepthViewer('depth_viewer_name', depth_camera, renderer_geometry)
     tracker.AddViewer(depth_viewer)
 
+# Setup body model and properties
 obj_model_path = Path(args.models_dir) / f'{args.body_name}.obj'
 print(f'Loading object {obj_model_path}')
 body = pym3t.Body(
@@ -99,7 +100,7 @@ body = pym3t.Body(
 )
 renderer_geometry.AddBody(body)
 
-# Set up link
+# Set up link (m3t handles polyarticulated systems, here we have only one link corresponding to the object)
 link = pym3t.Link(args.body_name + '_link', body)
 
 # Shared renderer between region and texture 
@@ -146,11 +147,15 @@ if args.use_texture:
 optimizer = pym3t.Optimizer(args.body_name+'_optimizer', link)
 tracker.AddOptimizer(optimizer)
 
+#----------------
 # Intialize object pose
 link2world_pose = np.array([ 1, 0,  0, 0,
                              0, 0, -1, 0,
                              0, 1,  0, 0.456,
                              0, 0,  0, 1 ]).reshape((4,4))
+dR_l = quaternion.as_rotation_matrix(quaternion.from_rotation_vector([0.2,0,0.0]))
+link2world_pose[:3,:3] = link2world_pose[:3,:3] @ dR_l
+#----------------
 
 ok = tracker.SetUp()
 
@@ -165,7 +170,8 @@ depth_names = sorted(glob.glob((imgs_dir / 'depth*').as_posix()))
 color_names = color_names[:args.nb_img_load]
 depth_names = depth_names[:args.nb_img_load]
 print(f'{len(color_names)} images to load')
-print('Press q to quit during execution')
+print('\n------\nPress q to quit during execution')
+print('Press any key to step to next image')
 
 # load images from disk
 color_read_flags = cv2.IMREAD_COLOR + cv2.IMREAD_ANYDEPTH
@@ -183,7 +189,7 @@ SLEEP = int(1000/30)  # frames at 30 Hz
 # Simulate one iteration of Tracker::RunTrackerProcess for loop
 for i, (img_bgr, img_depth) in enumerate(zip(img_bgr_lst, img_depth_lst)):
     t1 = time.time()
-    print('Iteration: ', i)
+    print('\nIteration: ', i)
     # 1) Update camera image -> replaces a call to the camera UpdateImage method (which does nothing for Dummy(Color|Depth)Camera) 
     color_camera.image = img_bgr
     depth_camera.image = img_depth

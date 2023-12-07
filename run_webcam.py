@@ -85,6 +85,7 @@ color_camera.intrinsics = pym3t.Intrinsics(**intrinsics_approx)
 color_viewer = pym3t.NormalColorViewer('color_viewer', color_camera, renderer_geometry)
 tracker.AddViewer(color_viewer)
 
+# Setup body model and properties
 obj_model_path = Path(args.models_dir) / f'{args.body_name}.obj'
 print(f'Loading object {obj_model_path}')
 body = pym3t.Body(
@@ -97,7 +98,7 @@ body = pym3t.Body(
 )
 renderer_geometry.AddBody(body)
 
-# Set up link
+# Set up link (m3t handles polyarticulated systems, here we have only one link corresponding to the object)
 link = pym3t.Link(args.body_name + '_link', body)
 
 # Shared renderer between region and texture 
@@ -127,11 +128,15 @@ if args.use_texture:
 optimizer = pym3t.Optimizer(args.body_name+'_optimizer', link)
 tracker.AddOptimizer(optimizer)
 
+#----------------
 # Intialize object pose
-link2world_pose_init = np.array([ 1, 0,  0, 0,
-                                  0, 0, -1, 0,
-                                  0, 1,  0, 0.456,
-                                  0, 0,  0, 1 ]).reshape((4,4))
+link2world_pose = np.array([ 1, 0,  0, 0,
+                             0, 0, -1, 0,
+                             0, 1,  0, 0.556,
+                             0, 0,  0, 1 ]).reshape((4,4))
+dR_l = quaternion.as_rotation_matrix(quaternion.from_rotation_vector([0.2,0,0.0]))
+link2world_pose[:3,:3] = link2world_pose[:3,:3] @ dR_l
+#----------------
 
 ok = tracker.SetUp()
 if not ok:
@@ -155,7 +160,8 @@ while(True):
 	k = cv2.waitKey(1)
 	if k == ord('d'):
 		print('Init object pose')
-		body.body2world_pose = link2world_pose_init.copy()  # simulate external initial pose
+		body.body2world_pose = link2world_pose  # simulate external initial pose
+		# body.link2world_pose = link2world_pose  # no effect
 		tracking = False
 	if k == ord('x'):
 		tracking = True

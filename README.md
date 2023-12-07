@@ -16,7 +16,11 @@ As example of usage of the library, scripts are provided:
 * `run_on_camera_sequence_realsense.py`: single object tracking with realsense camera
 * `run_webcam.py`: single object tracking with first camera device detected by the system (webcam or other usb camera usually)
 
+For all examples, you need a object mesh stored in the wavefront .obj format. Upon first execution, a set of sparve template views are generated which can take some time.
+
 ## Running image per image
+For this example you need a set of of recorded sequential color (and depth) images stored in a directory 
+as well as calibrated camera intrinsics in the formate described in config/cam_d435_640.yaml.
 ----
 Color only:   
 ```

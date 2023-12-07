@@ -4,10 +4,10 @@ python run_on_camera_sequence_realsense.py --use_region --use_depth --use_textur
 """
 
 import numpy as np
+import quaternion
 import argparse
 import pym3t
 from pathlib import Path
-
 
 
 def parse_script_input():
@@ -48,6 +48,7 @@ if args.use_depth and args.use_depth_viewer:
     depth_viewer = pym3t.NormalDepthViewer('depth_viewer_name', depth_camera, renderer_geometry)
     tracker.AddViewer(depth_viewer)
 
+# Setup body model and properties
 obj_model_path = Path(args.models_dir) / f'{args.body_name}.obj'
 print(f'Loading object {obj_model_path}')
 body = pym3t.Body(
@@ -60,7 +61,7 @@ body = pym3t.Body(
 )
 renderer_geometry.AddBody(body)
 
-# Set up link
+# Set up link (m3t handles polyarticulated systems, here we have only one link corresponding to the object)
 link = pym3t.Link(args.body_name + '_link', body)
 
 # Shared renderer between region and texture 
@@ -108,11 +109,15 @@ if args.use_texture:
 optimizer = pym3t.Optimizer(args.body_name+'_optimizer', link)
 tracker.AddOptimizer(optimizer)
 
+#----------------
 # Intialize object pose
 link2world_pose = np.array([ 1, 0,  0, 0,
                              0, 0, -1, 0,
-                             0, 1,  0, 0.456,
+                             0, 1,  0, 0.556,
                              0, 0,  0, 1 ]).reshape((4,4))
+dR_l = quaternion.as_rotation_matrix(quaternion.from_rotation_vector([0.2,0,0.0]))
+link2world_pose[:3,:3] = link2world_pose[:3,:3] @ dR_l
+#----------------
 
 detector = pym3t.StaticDetector('static_detector', optimizer, link2world_pose, False)
 tracker.AddDetector(detector)
