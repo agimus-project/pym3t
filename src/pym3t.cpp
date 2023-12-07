@@ -189,6 +189,8 @@ PYBIND11_MODULE(_pym3t_mod, m) {
     py::class_<NormalDepthViewer, Viewer, std::shared_ptr<NormalDepthViewer>>(m, "NormalDepthViewer")
         .def(py::init<const std::string &, const std::shared_ptr<DepthCamera> &, const std::shared_ptr<RendererGeometry> &, float, float, float>(),
                       "name"_a, "depth_camera_ptr"_a, "renderer_geometry_ptr"_a, "min_depth"_a=0.0f, "max_depth"_a=1.0f, "opacity"_a=0.5f)
+        .def("UpdateViewer", &NormalDepthViewer::UpdateViewer, "save_index"_a)
+        .def("set_opacity", &NormalDepthViewer::set_opacity, "opacity"_a)
         ;
 
     // Handling abstract class FocusedDepthRenderer
