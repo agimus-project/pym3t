@@ -18,10 +18,10 @@ As example of usage of the library, scripts are provided:
 
 For all examples, you need a object mesh stored in the wavefront .obj format. Upon first execution, a set of sparve template views are generated which can take some time.
 
-## Running image per image
+## Running image per image  
+----
 For this example you need a set of of recorded sequential color (and depth) images stored in a directory 
 as well as calibrated camera intrinsics in the formate described in config/cam_d435_640.yaml.
-----
 Color only:   
 ```
 python run_image_per_image.py --use_region --use_depth --use_texture -b obj_000014 -m <path/to/obj/dir> -i <path/to/image/dir> -c config/cam_d435_640.yaml -n 10 -s
