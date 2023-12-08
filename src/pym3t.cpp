@@ -60,6 +60,10 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def("ExecuteDetectingStep", &Tracker::ExecuteDetectingStep, "iteration"_a=0, "Run all detectors, iteration arg is not used")
         .def("ExecuteTrackingStep", &Tracker::ExecuteTrackingStep, "iteration"_a)
         .def("ExecuteStartingStep", &Tracker::ExecuteStartingStep, "iteration"_a)
+        .def("CalculateCorrespondences", &Tracker::CalculateCorrespondences, "iteration"_a, "corr_iteration"_a)
+        .def("CalculateGradientAndHessian", &Tracker::CalculateGradientAndHessian, "iteration"_a,  "corr_iteration"_a, "update_iteration"_a)
+        .def("CalculateOptimization", &Tracker::CalculateOptimization, "iteration"_a, "corr_iteration"_a, "update_iteration"_a)
+        .def("CalculateResults", &Tracker::CalculateResults, "iteration"_a)
         .def("StartModalities", &Tracker::StartModalities, "iteration"_a)
         .def("UpdateViewers", &Tracker::UpdateViewers, "iteration"_a)
         .def("UpdateCameras", &Tracker::UpdateCameras)
@@ -250,6 +254,8 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def(py::init<const std::string &, const std::filesystem::path &, const std::shared_ptr<Body> &>(), "name"_a, "metafile_path"_a, "body_ptr"_a)
         .def_property("link2world_pose", &Link::link2world_pose, &Link::set_link2world_pose)
         .def("AddModality", &Link::AddModality)
+        .def("CalculateGradientAndHessian", &Link::CalculateGradientAndHessian)
+        .def_property_readonly("modalities", &Link::modality_ptrs)
         .def("gradient", &Link::gradient)
         .def("hessian", &Link::hessian)
         .def("jacobian", &Link::jacobian)
@@ -325,7 +331,10 @@ PYBIND11_MODULE(_pym3t_mod, m) {
     };
 
     // Modality -> not constructible, just to enable automatic downcasting and binding of child classes
-    py::class_<Modality, PyModality, std::shared_ptr<Modality>>(m, "Modality");
+    py::class_<Modality, PyModality, std::shared_ptr<Modality>>(m, "Modality")
+        .def_property_readonly("gradient", &Modality::gradient)
+        .def_property_readonly("hessian", &Modality::hessian)
+        ;
 
     // RegionModality
     py::class_<RegionModality, Modality, std::shared_ptr<RegionModality>>(m, "RegionModality")

@@ -11,7 +11,7 @@ import numpy as np
 import quaternion
 from pathlib import Path
 
-from single_view_tracker_example import setup_single_object_tracker
+from single_view_tracker_example import setup_single_object_tracker, ExecuteTrackingStep
 
 
 def parse_script_input():
@@ -44,9 +44,9 @@ with open(args.cam_path, 'r') as f:
     cam_intrinsics = yaml.load(f.read(), Loader=yaml.UnsafeLoader)
 
 if args.use_depth:
-    tracker, optimizer, body, color_camera, depth_camera, color_viewer, depth_viewer = setup_single_object_tracker(args, cam_intrinsics)
+    tracker, optimizer, body, link, color_camera, depth_camera, color_viewer, depth_viewer = setup_single_object_tracker(args, cam_intrinsics)
 else:
-    tracker, optimizer, body, color_camera, color_viewer = setup_single_object_tracker(args, cam_intrinsics)
+    tracker, optimizer, body, link, color_camera, color_viewer = setup_single_object_tracker(args, cam_intrinsics)
 
 imgs_dir = Path(args.imgs_dir)
 if not imgs_dir.exists():
@@ -81,6 +81,9 @@ SLEEP = int(1000/30)  # frames at 30 Hz
 print('\n------\nPress q to quit during execution')
 print('Press any other key to step to next image')
 
+scale_t = 100
+scale_r = 100
+tikhonov_trans, tikhonov_rot = scale_t*optimizer.tikhonov_parameter_translation, scale_r*optimizer.tikhonov_parameter_rotation
 
 # Simulate one iteration of Tracker::RunTrackerProcess for loop
 for i, (img_bgr, img_depth) in enumerate(zip(img_bgr_lst, img_depth_lst)):
@@ -100,7 +103,8 @@ for i, (img_bgr, img_depth) in enumerate(zip(img_bgr_lst, img_depth_lst)):
 
     # 3) One tracking cycle
     t = time.time()
-    tracker.ExecuteTrackingStep(i)
+    ExecuteTrackingStep(tracker, link, body, i, tikhonov_trans, tikhonov_rot)
+    # tracker.ExecuteTrackingStep(i)
     print('ExecuteTrackingCycle (ms)', 1000*(time.time() - t))
     print('body.body2world_pose\n',body.body2world_pose)
 

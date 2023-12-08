@@ -1,4 +1,5 @@
 import argparse
+import cv2
 import numpy as np
 import quaternion
 from pathlib import Path
@@ -157,6 +158,56 @@ def setup_single_object_tracker(args: argparse.Namespace, cam_intrinsics: dict =
         raise ValueError('tracker SetUp failed')
 
     if args.use_depth:
-        return tracker, optimizer, body, color_camera, depth_camera, color_viewer, depth_viewer
+        return tracker, optimizer, body, link, color_camera, depth_camera, color_viewer, depth_viewer
     else:
-        return tracker, optimizer, body, color_camera, color_viewer
+        return tracker, optimizer, body, link, color_camera, color_viewer
+
+
+def ExecuteTrackingStep(tracker: pym3t.Tracker, link: pym3t.Link, body: pym3t.Body, iteration: int, tikhonov_trans: float, tikhonov_rot: float,  n_corr_iteration=5, n_update_iterations=2):
+    """
+    Reproducing the coarse to fine optimization procedure. Should use direclty instead tracker.ExecuteTrackingStep for practical applications.
+    - CalculateCorrespondences: 
+        - RegionModality: get correspondance lines by projecting contour points and normals to camera image and computing
+                          likelihood of background/foreground belonging for each pixel
+        - DepthModality: ICP like with point-2-plane error metric
+        - TextureModality: detect feature/descriptor in new image and match them with previous keyframe
+
+    n_corr_iterations: number of times new correspondences are established
+    n_update_iterations: number of times the pose is updated for each correspondence iteration
+    """
+    for corr_iteration in range(n_corr_iteration):
+        tracker.CalculateCorrespondences(iteration, corr_iteration)
+        for update_iteration in range(n_update_iterations):
+
+            # Compute gradient hessians of the log likelihoods for all modalities
+            tracker.CalculateGradientAndHessian(iteration, corr_iteration, update_iteration)
+
+            ###################
+            # Agregate gradient and hessian for each modality and store in link
+            # Unconventionally, hessian and gradients are implemented as derivatives of the log-likelihood
+            # -> minus sign to minimize the negative log-likelihood 
+            H = np.zeros((6,6))
+            g = np.zeros(6)
+            for modality in link.modalities:
+                H -= modality.hessian
+                g -= modality.gradient
+
+            # Solve normal equation with tikhonov regularization
+            # Delta pose is defined using SO(3)xR3 representation (angle axis, translation)
+            # expressed in the local body frame (-> right multiplication)
+            tikho_vec = np.concatenate([3*[tikhonov_rot], 3*[tikhonov_trans]])
+            delta_pose = np.linalg.solve(H + np.diag(tikho_vec), -g)
+            
+            # Update link pose
+            delta_theta, delta_posi = delta_pose[:3], delta_pose[3:]
+            delta_R = cv2.Rodrigues(delta_theta)[0]  # SO(3) exponential map
+            pose_variation = np.eye(4)
+            pose_variation[:3,:3] = delta_R
+            pose_variation[:3,3] = delta_posi
+            body.body2world_pose = body.body2world_pose @ pose_variation
+            ###################
+
+    # Update modalities states 
+    # - region modality: update color histograms
+    # - texture modality: update keyframe if enough rotation, render silhouette+depth and update tracked features
+    tracker.CalculateResults(iteration)
