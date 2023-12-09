@@ -28,12 +28,12 @@ Calibrated camera intrinsics in the formate described in config/cam_d435_640.yam
 
 Color only:   
 ```
-python run_image_dir_example.py --use_region -b obj_000014 -m <path/to/obj/dir> -i <path/to/image/dir> -c config/cam_d435_640.yaml --stop
+python examples/run_image_dir_example.py --use_region -b obj_000014 -m <path/to/obj/dir> -i <path/to/image/dir> -c config/cam_d435_640.yaml --stop
 ```
 
 Color + depth:   
 ```
-python run_image_dir_example.py --use_region --use_depth -b obj_000014 -m <path/to/obj/dir> -i <path/to/image/dir> -c config/cam_d435_640.yaml --stop
+python examples/run_image_dir_example.py --use_region --use_depth -b obj_000014 -m <path/to/obj/dir> -i <path/to/image/dir> -c config/cam_d435_640.yaml --stop
 ```
 
 Keyboard commands:
@@ -43,7 +43,7 @@ Keyboard commands:
 ## Running with webcam
 To bypass camera calibration, a reasonable horizontal fov (~50-70 degrees) can be assumed to get camera intrinsics
 ```
-python run_webcam_example.py --use_region -b obj_000014 -m <path/to/obj/dir>
+python examples/run_webcam_example.py --use_region -b obj_000014 -m <path/to/obj/dir>
 ```
 
 Keyboard commands:
@@ -55,13 +55,13 @@ Keyboard commands:
 ----
 Color only:   
 ```
-python run_realsense_example.py --use_region -b obj_000014 -m <path/to/obj/dir>
+python examples/run_realsense_example.py --use_region -b obj_000014 -m <path/to/obj/dir>
 ```
 
 ----
 Color + depth:   
 ```
-python run_realsense_example.py --use_region --use_depth -b obj_000014 -m <path/to/obj/dir>
+python examples/run_realsense_example.py --use_region --use_depth -b obj_000014 -m <path/to/obj/dir>
 ```
 
 Keyboard commands:
