@@ -151,6 +151,7 @@ def setup_single_object_tracker(args: argparse.Namespace, cam_intrinsics: dict =
         link.AddModality(texture_modality)
 
     optimizer = pym3t.Optimizer(args.body_name+'_optimizer', link)
+
     tracker.AddOptimizer(optimizer)
 
     ok = tracker.SetUp()
@@ -163,9 +164,13 @@ def setup_single_object_tracker(args: argparse.Namespace, cam_intrinsics: dict =
         return tracker, optimizer, body, link, color_camera, color_viewer
 
 
-def ExecuteTrackingStep(tracker: pym3t.Tracker, link: pym3t.Link, body: pym3t.Body, iteration: int, tikhonov_trans: float, tikhonov_rot: float,  n_corr_iteration=5, n_update_iterations=2):
+def ExecuteTrackingStepSingleObject(tracker: pym3t.Tracker, link: pym3t.Link, body: pym3t.Body, 
+                                    iteration: int, tikhonov_trans: float, tikhonov_rot: float,  
+                                    n_corr_iteration=5, n_update_iterations=2):
     """
-    Reproducing the coarse to fine optimization procedure. Should use direclty instead tracker.ExecuteTrackingStep for practical applications.
+    Reproducing the coarse to fine optimization procedure.
+     
+    Meant for educational purpose only, tracker.ExecuteTrackingStep should used instead for practical applications.
     - CalculateCorrespondences: 
         - RegionModality: get correspondance lines by projecting contour points and normals to camera image and computing
                           likelihood of background/foreground belonging for each pixel
@@ -176,6 +181,14 @@ def ExecuteTrackingStep(tracker: pym3t.Tracker, link: pym3t.Link, body: pym3t.Bo
     n_update_iterations: number of times the pose is updated for each correspondence iteration
     """
     for corr_iteration in range(n_corr_iteration):
+        """
+        CalculateCorrespondences gathers information from current image for all setup modalities. M3T includes: 
+        - RegionModality: get correspondance lines by projecting contour points and normals to camera image and computing
+                          likelihood that each pixel belongs to background/foreground
+        - DepthModality: ICP like with point-2-plane error metric
+        - TextureModality: detect feature/descriptor in new image and match them with previous keyframe
+        """
+
         tracker.CalculateCorrespondences(iteration, corr_iteration)
         for update_iteration in range(n_update_iterations):
 

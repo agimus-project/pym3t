@@ -432,6 +432,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
     py::class_<Optimizer, std::shared_ptr<Optimizer>>(m, "Optimizer")
         .def(py::init<const std::string &, const std::shared_ptr<Link> &, float, float>(),
                       "name"_a, "root_link_ptr"_a, "tikhonov_parameter_rotation"_a=1000.0f, "tikhonov_parameter_translation"_a=30000.0f)
+        .def("SetUp", &Optimizer::SetUp)
         .def_property("name", &Optimizer::name, &Optimizer::set_name)
         .def_property("metafile_path", &Optimizer::metafile_path, &Optimizer::set_metafile_path)
         .def_property("tikhonov_parameter_rotation", &Optimizer::tikhonov_parameter_rotation, &Optimizer::set_tikhonov_parameter_rotation)

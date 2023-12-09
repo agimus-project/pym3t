@@ -11,7 +11,7 @@ import argparse
 import numpy as np
 import quaternion
 
-from single_view_tracker_example import setup_single_object_tracker, ExecuteTrackingStep
+from single_view_tracker_example import setup_single_object_tracker, ExecuteTrackingStepSingleObject
 
 def parse_script_input():
     parser = argparse.ArgumentParser(
@@ -67,10 +67,13 @@ dR_l = quaternion.as_rotation_matrix(quaternion.from_rotation_vector([0.2,0,0.0]
 body2world_pose[:3,:3] = body2world_pose[:3,:3] @ dR_l
 #----------------
 
-# TEST: try changing default regularization values
-scale_t = 100
-scale_r = 100
-tikhonov_trans, tikhonov_rot = scale_t*optimizer.tikhonov_parameter_translation, scale_r*optimizer.tikhonov_parameter_rotation
+#----------------------
+scale_t = 1
+scale_r = 1
+optimizer.tikhonov_parameter_translation *= scale_t
+optimizer.tikhonov_parameter_rotation *= scale_r
+optimizer.SetUp()
+#----------------------
 
 tracking = False
 i = 0
@@ -94,7 +97,7 @@ while(True):
 	if tracking:
 		t = time.time()
 		# tracker.ExecuteTrackingStep(i)
-		ExecuteTrackingStep(tracker, link, body, i, tikhonov_trans, tikhonov_rot)
+		ExecuteTrackingStepSingleObject(tracker, link, body, i, optimizer.tikhonov_parameter_translation, optimizer.tikhonov_parameter_rotation)
 		print('ExecuteTrackingCycle (ms)', 1000*(time.time() - t))
 		print('body.body2world_pose\n',body.body2world_pose)
 

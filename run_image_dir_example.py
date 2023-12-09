@@ -11,7 +11,7 @@ import numpy as np
 import quaternion
 from pathlib import Path
 
-from single_view_tracker_example import setup_single_object_tracker, ExecuteTrackingStep
+from single_view_tracker_example import setup_single_object_tracker, ExecuteTrackingStepSingleObject
 
 
 def parse_script_input():
@@ -81,9 +81,13 @@ SLEEP = int(1000/30)  # frames at 30 Hz
 print('\n------\nPress q to quit during execution')
 print('Press any other key to step to next image')
 
-scale_t = 100
-scale_r = 100
-tikhonov_trans, tikhonov_rot = scale_t*optimizer.tikhonov_parameter_translation, scale_r*optimizer.tikhonov_parameter_rotation
+#----------------------
+scale_t = 1
+scale_r = 1
+optimizer.tikhonov_parameter_translation *= scale_t
+optimizer.tikhonov_parameter_rotation *= scale_r
+optimizer.SetUp()
+#----------------------
 
 # Simulate one iteration of Tracker::RunTrackerProcess for loop
 for i, (img_bgr, img_depth) in enumerate(zip(img_bgr_lst, img_depth_lst)):
@@ -103,8 +107,8 @@ for i, (img_bgr, img_depth) in enumerate(zip(img_bgr_lst, img_depth_lst)):
 
     # 3) One tracking cycle
     t = time.time()
-    ExecuteTrackingStep(tracker, link, body, i, tikhonov_trans, tikhonov_rot)
     # tracker.ExecuteTrackingStep(i)
+    ExecuteTrackingStepSingleObject(tracker, link, body, i, optimizer.tikhonov_parameter_translation, optimizer.tikhonov_parameter_rotation)
     print('ExecuteTrackingCycle (ms)', 1000*(time.time() - t))
     print('body.body2world_pose\n',body.body2world_pose)
 
