@@ -2,7 +2,7 @@
 #ifndef M3t_INCLUDE_M3t_dummy_camera_H_
 #define M3t_INCLUDE_M3t_dummy_camera_H_
 
-#include <filesystem/filesystem.h>
+#include <filesystem>
 #include <m3t/camera.h>
 #include <m3t/common.h>
 
