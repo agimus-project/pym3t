@@ -1,6 +1,6 @@
 [build-system]
 # build time dependencies, installed in an isolated environment
-requires = ["scikit-build-core", "pybind11"]
+requires = ["scikit-build-core"]
 # use scikit-build instead of setuptools
 build-backend = "scikit_build_core.build"
 
