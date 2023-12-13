@@ -9,14 +9,6 @@ cmake_policy(SET CMP0148 OLD) # required for current pybind11
 
 # set(CMAKE_BUILD_TYPE "RELEASE") set(CMAKE_BUILD_TYPE "DEBUG")
 
-# set(CMAKE_CXX_STANDARD 17)
-
-# We need libraries to be generated with Position Independent Code otherwise
-# compilation error in the pybind11 code set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}
-# -fPIC")
-
-# add_subdirectory(extern/3DObjectTracking/M3T)
-
 include(FetchContent)
 FetchContent_Declare(
   pybind11
@@ -26,9 +18,8 @@ FetchContent_Declare(
   m3t
   GIT_REPOSITORY "https://github.com/DLR-RM/3DObjectTracking.git"
   GIT_TAG "master"
-  CMAKE_ARGS "-DUSE_AZURE_KINECT=${USE_AZURE_KINECT}"
-  "-DUSE_REALSENSE=${USE_REALSENSE}" "-DUSE_GTEST=${USE_GTEST}" SOURCE_SUBDIR
-  "M3T")
+  SOURCE_SUBDIR "M3T" CMAKE_ARGS "-DUSE_AZURE_KINECT=${USE_AZURE_KINECT}"
+  "-DUSE_REALSENSE=${USE_REALSENSE}" "-DUSE_GTEST=${USE_GTEST}")
 FetchContent_MakeAvailable(pybind11 m3t)
 
 # Create library for the extensions to m3t
