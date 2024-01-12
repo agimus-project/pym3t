@@ -130,20 +130,16 @@ PYBIND11_MODULE(_pym3t_mod, m) {
 
     // DummyColorCamera
     py::class_<DummyColorCamera, ColorCamera, std::shared_ptr<DummyColorCamera>>(m, "DummyColorCamera")
-        .def(py::init<const std::string &, bool>(), "name"_a, "use_depth_as_world_frame"_a=false)
+        .def(py::init<const std::string &>(), "name"_a)
         .def_property("image", &Camera::image, &DummyColorCamera::set_image)
         .def_property("intrinsics", &DummyColorCamera::get_intrinsics, &DummyColorCamera::set_intrinsics)
-        .def_property("color2depth_pose", &DummyColorCamera::get_color2depth_pose, &DummyColorCamera::set_color2depth_pose)
-        .def_property("depth2color_pose", &DummyColorCamera::get_depth2color_pose, &DummyColorCamera::set_depth2color_pose)
         ;
 
     // DummyDepthCamera
     py::class_<DummyDepthCamera, DepthCamera, std::shared_ptr<DummyDepthCamera>>(m, "DummyDepthCamera")
-        .def(py::init<const std::string &, bool, float>(), "name"_a, "use_color_as_world_frame"_a=true, "depth_scale"_a=0.001)
+        .def(py::init<const std::string &, float>(), "name"_a, "depth_scale"_a=0.001)
         .def_property("image", &Camera::image, &DummyDepthCamera::set_image)
         .def_property("intrinsics", &DummyDepthCamera::get_intrinsics, &DummyDepthCamera::set_intrinsics)
-        .def_property("color2depth_pose", &DummyDepthCamera::get_color2depth_pose, &DummyDepthCamera::set_color2depth_pose)
-        .def_property("depth2color_pose", &DummyDepthCamera::get_depth2color_pose, &DummyDepthCamera::set_depth2color_pose)
         .def_property("depth_scale", &DummyDepthCamera::depth_scale, &DummyDepthCamera::set_depth_scale)
         ;
 

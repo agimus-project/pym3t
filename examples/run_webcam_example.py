@@ -11,7 +11,7 @@ import argparse
 import numpy as np
 import quaternion
 
-from single_view_tracker_example import setup_single_object_tracker, ExecuteTrackingStepSingleObject
+from single_view_tracker_example import init_single_object_tracker, ExecuteTrackingStepSingleObject
 
 def parse_script_input():
     parser = argparse.ArgumentParser(
@@ -55,7 +55,11 @@ cam_intrinsics = {
 }
 
 # Setup tracker and all related objects
-tracker, optimizer, body, link, color_camera, color_viewer = setup_single_object_tracker(args, cam_intrinsics)
+tracker, optimizer, body, link, color_camera, color_viewer = init_single_object_tracker(args, cam_intrinsics)
+
+ok = tracker.SetUp()
+if not ok:
+    raise ValueError('tracker SetUp failed')
 
 #----------------
 # Initialize object pose

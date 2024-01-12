@@ -8,7 +8,7 @@ import quaternion
 import argparse
 import pym3t
 
-from single_view_tracker_example import setup_single_object_tracker
+from single_view_tracker_example import init_single_object_tracker
 
 
 def parse_script_input():
@@ -34,9 +34,13 @@ args = parse_script_input()
 
 # Setup tracker and all related objects
 if args.use_depth:
-    tracker, optimizer, body, link, color_camera, depth_camera, color_viewer, depth_viewer = setup_single_object_tracker(args, use_realsense=True)
+    tracker, optimizer, body, link, color_camera, depth_camera, color_viewer, depth_viewer = init_single_object_tracker(args, use_realsense=True)
 else:
-    tracker, optimizer, body, link, color_camera, color_viewer = setup_single_object_tracker(args, use_realsense=True)
+    tracker, optimizer, body, link, color_camera, color_viewer = init_single_object_tracker(args, use_realsense=True)
+
+ok = tracker.SetUp()
+if not ok:
+    raise ValueError('tracker SetUp failed')
 
 #----------------
 # Initialize object pose

@@ -20,14 +20,14 @@ def test_types_and_dummy_camera():
     # numpy <--> Transform3fA aka Eigen::Transform<float, 3, Eigen::Affine>
     T1 = np.random.random((4,4)).astype(np.float64)
     T2 = np.random.random((4,4)).astype(np.float32)
-    color_camera.color2depth_pose = T1
-    assert(color_camera.color2depth_pose.dtype == np.float32)
-    assert(color_camera.color2depth_pose.shape == (4,4))
-    assert(np.isclose(color_camera.color2depth_pose, T1).any())
-    color_camera.color2depth_pose = T2
-    assert(color_camera.color2depth_pose.dtype == np.float32)
-    assert(color_camera.color2depth_pose.shape == (4,4))
-    assert(np.isclose(color_camera.color2depth_pose, T2).any())
+    color_camera.world2camera_pose = T1
+    assert(color_camera.world2camera_pose.dtype == np.float32)
+    assert(color_camera.world2camera_pose.shape == (4,4))
+    assert(np.isclose(color_camera.world2camera_pose, T1).any())
+    color_camera.world2camera_pose = T2
+    assert(color_camera.world2camera_pose.dtype == np.float32)
+    assert(color_camera.world2camera_pose.shape == (4,4))
+    assert(np.isclose(color_camera.world2camera_pose, T2).any())
 
     # numpy <--> cv::Mat
     color_size = (60,40,3)

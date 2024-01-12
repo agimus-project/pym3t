@@ -16,10 +16,8 @@ namespace m3t {
  * DummyColorCamera implementation
 */
 
-DummyColorCamera::DummyColorCamera(const std::string &name,
-                                           bool use_depth_as_world_frame)
-    : ColorCamera(name),
-      use_depth_as_world_frame_(use_depth_as_world_frame) {}
+DummyColorCamera::DummyColorCamera(const std::string &name)
+    : ColorCamera(name) {}
 
 DummyColorCamera::DummyColorCamera(
     const std::string &name, const std::filesystem::path &metafile_path)
@@ -31,22 +29,10 @@ bool DummyColorCamera::SetUp() {
   set_up_ = false;
   if (!metafile_path_.empty())
     if (!LoadMetaData()) return false;
-  if (!extrinsics_set_)
-  {
-    std::cerr << "DummyColorCamera::set_image color2depth_pose or depth2color_pose not set" << std::endl;
-    return false;
-  }
-  if (use_depth_as_world_frame_)
-    set_camera2world_pose(color2depth_pose_);
   SaveMetaDataIfDesired();
   set_up_ = true;
   initial_set_up_ = true;
   return true;
-}
-
-void DummyColorCamera::set_use_depth_as_world_frame(bool use_depth_as_world_frame) {
-  use_depth_as_world_frame_ = use_depth_as_world_frame;
-  set_up_ = false;
 }
 
 void DummyColorCamera::set_image(const cv::Mat& img){
@@ -61,18 +47,6 @@ void DummyColorCamera::set_image(const cv::Mat& img){
 void DummyColorCamera::set_intrinsics(const Intrinsics& _intrinsics)
 {
   intrinsics_ = _intrinsics;
-}
-
-void DummyColorCamera::set_color2depth_pose(const Transform3fA& color2depth_pose) {
-  extrinsics_set_ = true;
-  color2depth_pose_ = color2depth_pose;
-  depth2color_pose_ = color2depth_pose.inverse();
-}
-
-void DummyColorCamera::set_depth2color_pose(const Transform3fA& depth2color_pose) {
-  extrinsics_set_ = true;
-  depth2color_pose_ = depth2color_pose;
-  color2depth_pose_ = depth2color_pose.inverse();
 }
 
 bool DummyColorCamera::UpdateImage(bool synchronized) {
@@ -92,20 +66,8 @@ bool DummyColorCamera::UpdateImage(bool synchronized) {
   return true;
 }
 
-bool DummyColorCamera::use_depth_as_world_frame() const {
-  return use_depth_as_world_frame_;
-}
-
 const Intrinsics& DummyColorCamera::get_intrinsics() const {
   return intrinsics_;
-}
-
-const Transform3fA& DummyColorCamera::get_color2depth_pose() const {
-  return color2depth_pose_;
-}
-
-const Transform3fA& DummyColorCamera::get_depth2color_pose() const {
-  return depth2color_pose_;
 }
 
 bool DummyColorCamera::LoadMetaData() {
@@ -119,8 +81,6 @@ bool DummyColorCamera::LoadMetaData() {
   ReadOptionalValueFromYaml(fs, "save_index", &save_index_);
   ReadOptionalValueFromYaml(fs, "save_image_type", &save_image_type_);
   ReadOptionalValueFromYaml(fs, "save_images", &save_images_);
-  ReadOptionalValueFromYaml(fs, "use_depth_as_world_frame",
-                            &use_depth_as_world_frame_);
   fs.release();
 
   // Process parameters
@@ -136,10 +96,8 @@ bool DummyColorCamera::LoadMetaData() {
 */
 
 DummyDepthCamera::DummyDepthCamera(const std::string &name,
-                                   bool use_color_as_world_frame,
                                    float depth_scale)
-    : DepthCamera{name},
-      use_color_as_world_frame_{use_color_as_world_frame} {
+    : DepthCamera(name) {
   set_depth_scale(depth_scale);
 }
 
@@ -153,22 +111,9 @@ bool DummyDepthCamera::SetUp() {
   set_up_ = false;
   if (!metafile_path_.empty())
     if (!LoadMetaData()) return false;
-  if (!extrinsics_set_)
-  {
-    std::cerr << "DummyDepthCamera::set_image color2depth_pose or depth2color_pose not set" << std::endl;
-    return false;
-  }
-  if (use_color_as_world_frame_)
-    set_camera2world_pose(depth2color_pose_);
   set_up_ = true;
   initial_set_up_ = true;
   return true;
-}
-
-void DummyDepthCamera::set_use_color_as_world_frame(
-    bool use_color_as_world_frame) {
-  use_color_as_world_frame_ = use_color_as_world_frame;
-  set_up_ = false;
 }
 
 void DummyDepthCamera::set_image(const cv::Mat& img){
@@ -183,18 +128,6 @@ void DummyDepthCamera::set_image(const cv::Mat& img){
 void DummyDepthCamera::set_intrinsics(const Intrinsics& _intrinsics)
 {
   intrinsics_ = _intrinsics;
-}
-
-void DummyDepthCamera::set_color2depth_pose(const Transform3fA& color2depth_pose) {
-  extrinsics_set_ = true;
-  color2depth_pose_ = color2depth_pose;
-  depth2color_pose_ = color2depth_pose.inverse();
-}
-
-void DummyDepthCamera::set_depth2color_pose(const Transform3fA& depth2color_pose) {
-  extrinsics_set_ = true;
-  depth2color_pose_ = depth2color_pose;
-  color2depth_pose_ = depth2color_pose.inverse();
 }
 
 void DummyDepthCamera::set_depth_scale(float depth_scale) {
@@ -218,20 +151,8 @@ bool DummyDepthCamera::UpdateImage(bool synchronized) {
   return true;
 }
 
-bool DummyDepthCamera::use_color_as_world_frame() const {
-  return use_color_as_world_frame_;
-}
-
 const Intrinsics& DummyDepthCamera::get_intrinsics() const {
   return intrinsics_;
-}
-
-const Transform3fA& DummyDepthCamera::get_color2depth_pose() const {
-  return color2depth_pose_;
-}
-
-const Transform3fA& DummyDepthCamera::get_depth2color_pose() const {
-  return depth2color_pose_;
 }
 
 bool DummyDepthCamera::LoadMetaData() {
@@ -245,8 +166,6 @@ bool DummyDepthCamera::LoadMetaData() {
   ReadOptionalValueFromYaml(fs, "save_index", &save_index_);
   ReadOptionalValueFromYaml(fs, "save_image_type", &save_image_type_);
   ReadOptionalValueFromYaml(fs, "save_images", &save_images_);
-  ReadOptionalValueFromYaml(fs, "use_color_as_world_frame",
-                            &use_color_as_world_frame_);
   fs.release();
 
   // Process parameters

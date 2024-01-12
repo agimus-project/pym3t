@@ -11,7 +11,7 @@ import numpy as np
 import quaternion
 from pathlib import Path
 
-from single_view_tracker_example import setup_single_object_tracker, ExecuteTrackingStepSingleObject
+from single_view_tracker_example import init_single_object_tracker, ExecuteTrackingStepSingleObject, tq_to_SE3, inv_SE3
 
 
 def parse_script_input():
@@ -44,9 +44,25 @@ with open(args.cam_path, 'r') as f:
     cam_intrinsics = yaml.load(f.read(), Loader=yaml.UnsafeLoader)
 
 if args.use_depth:
-    tracker, optimizer, body, link, color_camera, depth_camera, color_viewer, depth_viewer = setup_single_object_tracker(args, cam_intrinsics)
+    tracker, optimizer, body, link, color_camera, depth_camera, color_viewer, depth_viewer = init_single_object_tracker(args, cam_intrinsics)
 else:
-    tracker, optimizer, body, link, color_camera, color_viewer = setup_single_object_tracker(args, cam_intrinsics)
+    tracker, optimizer, body, link, color_camera, color_viewer = init_single_object_tracker(args, cam_intrinsics)
+
+# Non-zero color camera transformation test
+color2world_pose = np.eye(4)
+color2world_pose[:3,:3] = quaternion.as_rotation_matrix(quaternion.from_rotation_vector([0.2,0.2,0.2]))
+color2world_pose[:3, 3] = np.array([0.2,0.2,0.2])
+color_camera.camera2world_pose = color2world_pose
+if args.use_depth:
+    # wd = wc*cd
+    color2depth_pose = tq_to_SE3(cam_intrinsics['trans_d_c'], cam_intrinsics['quat_d_c_xyzw'])
+    depth_camera.camera2world_pose = color2world_pose @ inv_SE3(color2depth_pose) 
+    # depth_camera.camera2world_pose = color2world_pose @ color2depth_pose 
+
+ok = tracker.SetUp()
+if not ok:
+    raise ValueError('tracker SetUp failed')
+
 
 imgs_dir = Path(args.imgs_dir)
 if not imgs_dir.exists():
@@ -67,14 +83,17 @@ depth_read_flags = cv2.IMREAD_GRAYSCALE + cv2.IMREAD_ANYDEPTH
 img_depth_lst = [cv2.imread(name, depth_read_flags) for name in depth_names]  # loads a dtype=uint8 array
 
 #----------------
-# Initialize object pose
-body2world_pose = np.array([ 1, 0,  0, 0,
+# Initialize object pose (aws sequences)
+body2color_pose = np.array([1, 0,  0, 0,
                              0, 0, -1, 0,
                              0, 1,  0, 0.456,
                              0, 0,  0, 1 ]).reshape((4,4))
 dR_l = quaternion.as_rotation_matrix(quaternion.from_rotation_vector([0.2,0,0.0]))
-body2world_pose[:3,:3] = body2world_pose[:3,:3] @ dR_l
+body2color_pose[:3,:3] = body2color_pose[:3,:3] @ dR_l
 #----------------
+
+# wb = wc*cb
+body2world_pose = color2world_pose @ body2color_pose 
 
 SLEEP = int(1000/30)  # frames at 30 Hz
 

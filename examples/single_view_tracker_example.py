@@ -30,8 +30,7 @@ def tq_to_SE3(t, q):
     T[:3,:3] = quaternion.as_rotation_matrix(quat)
     return T
 
-
-def setup_single_object_tracker(args: argparse.Namespace, cam_intrinsics: dict = None, use_realsense=False):
+def init_single_object_tracker(args: argparse.Namespace, cam_intrinsics: dict = None, use_realsense=False):
     """
     Setup and example pym3t object tracker and related objects
 
@@ -75,11 +74,12 @@ def setup_single_object_tracker(args: argparse.Namespace, cam_intrinsics: dict =
             depth_camera = pym3t.RealSenseDepthCamera('realsense_depth')
     else:
         color_camera = pym3t.DummyColorCamera('cam_color')
-        color_camera.color2depth_pose = tq_to_SE3(cam_intrinsics['trans_d_c'], cam_intrinsics['quat_d_c_xyzw'])
+        color_camera.camera2world_pose = np.eye(4, dtype=np.float64)
         color_camera.intrinsics = pym3t.Intrinsics(**cam_intrinsics['intrinsics_color'])
         if args.use_depth: 
             depth_camera = pym3t.DummyDepthCamera('cam_depth')
-            depth_camera.depth2color_pose = inv_SE3(color_camera.color2depth_pose)
+            color2depth_pose = tq_to_SE3(cam_intrinsics['trans_d_c'], cam_intrinsics['quat_d_c_xyzw'])
+            depth_camera.camera2world_pose = inv_SE3(color2depth_pose)
             depth_camera.intrinsics = pym3t.Intrinsics(**cam_intrinsics['intrinsics_depth'])
 
     # Most time is spent on rendering (tested without GPU: ~15 ms for both, 8 for color only)
@@ -153,10 +153,6 @@ def setup_single_object_tracker(args: argparse.Namespace, cam_intrinsics: dict =
     optimizer = pym3t.Optimizer(args.body_name+'_optimizer', link)
 
     tracker.AddOptimizer(optimizer)
-
-    ok = tracker.SetUp()
-    if not ok:
-        raise ValueError('tracker SetUp failed')
 
     if args.use_depth:
         return tracker, optimizer, body, link, color_camera, depth_camera, color_viewer, depth_viewer
