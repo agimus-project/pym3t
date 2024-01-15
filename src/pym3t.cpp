@@ -53,7 +53,6 @@ PYBIND11_MODULE(_pym3t_mod, m) {
                       const std::chrono::milliseconds&, int, int>(), 
                       "name"_a, "n_corr_iterations"_a=5, "n_update_iterations"_a=2, "synchronize_cameras"_a=true, "start_tracking_after_detection"_a=false,
                       "cycle_duration"_a=std::chrono::milliseconds{33}, "visualization_time"_a=0, "viewer_time"_a=1)
-
         .def("SetUp", &Tracker::SetUp, "set_up_all_objects"_a=true)
         .def("RunTrackerProcess", &Tracker::RunTrackerProcess, "execute_detection"_a=true, "start_tracking"_a=true, "names_detecting"_a=nullptr, "names_starting"_a=nullptr)
         .def("ExecuteDetectingStep", &Tracker::ExecuteDetectingStep, "iteration"_a=0, "Run all detectors, iteration arg is not used")
@@ -70,6 +69,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def("AddViewer", &Tracker::AddViewer)
         .def("AddDetector", &Tracker::AddDetector)
         .def("AddOptimizer", &Tracker::AddOptimizer)
+        .def_property("name", &Tracker::name, &Tracker::set_name)
         .def_property("n_corr_iterations", &Tracker::n_corr_iterations, &Tracker::set_n_corr_iterations)
         .def_property("n_update_iterations", &Tracker::n_update_iterations, &Tracker::set_n_update_iterations)
         ;
@@ -108,6 +108,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
     // Camera -> not constructible, just to enable automatic downcasting and binding of child classes
     py::class_<Camera, PyCamera, std::shared_ptr<Camera>>(m, "Camera")
         .def("SetUp", &Camera::SetUp)
+        .def_property("name", &Camera::name, &Camera::set_name)
         .def_property("camera2world_pose", &Camera::camera2world_pose, &Camera::set_camera2world_pose)
         .def_property("world2camera_pose", &Camera::world2camera_pose, &Camera::set_world2camera_pose)
         ;
@@ -248,9 +249,10 @@ PYBIND11_MODULE(_pym3t_mod, m) {
                       "body2joint_pose"_a=Transform3fA::Identity(), "joint2parent_pose"_a=Transform3fA::Identity(), "link2world_pose"_a=Transform3fA::Identity(),
                       "free_directions"_a=std::array<bool, 6>({true, true, true, true, true, true}), "fixed_body2joint_pose"_a=true)
         .def(py::init<const std::string &, const std::filesystem::path &, const std::shared_ptr<Body> &>(), "name"_a, "metafile_path"_a, "body_ptr"_a)
-        .def_property("link2world_pose", &Link::link2world_pose, &Link::set_link2world_pose)
         .def("AddModality", &Link::AddModality)
         .def("CalculateGradientAndHessian", &Link::CalculateGradientAndHessian)
+        .def_property("name", &Link::name, &Link::set_name)
+        .def_property("link2world_pose", &Link::link2world_pose, &Link::set_link2world_pose)
         .def_property_readonly("modalities", &Link::modality_ptrs)
         .def("gradient", &Link::gradient)
         .def("hessian", &Link::hessian)
@@ -270,7 +272,9 @@ PYBIND11_MODULE(_pym3t_mod, m) {
     };
 
     // Detector
-    py::class_<Detector, PyDetector, std::shared_ptr<Detector>>(m, "Detector");
+    py::class_<Detector, PyDetector, std::shared_ptr<Detector>>(m, "Detector")
+        .def_property("name", &Detector::name, &Detector::set_name)
+    ;
 
     // StaticDetector -> not constructible, just to enable automatic downcasting and binding of child classes
     py::class_<StaticDetector, Detector, std::shared_ptr<StaticDetector>>(m, "StaticDetector")
@@ -290,6 +294,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
                       float, int, int, float, float, bool, int>(),
                       "name"_a, "body_ptr"_a, "model_path"_a, 
                       "sphere_radius"_a=0.8f, "n_divides"_a=4, "n_points_max"_a=200, "max_radius_depth_offset"_a=0.05f, "stride_depth_offset"_a=0.002f, "use_random_seed"_a=false, "image_size"_a=2000)
+        .def_property("name", &RegionModel::name, &RegionModel::set_name)
         ;
 
     // DepthModel
@@ -298,6 +303,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
                       float, int, int, float, float, bool, int>(),
                       "name"_a, "body_ptr"_a, "model_path"_a, 
                       "sphere_radius"_a=0.8f, "n_divides"_a=4, "n_points_max"_a=200, "max_radius_depth_offset"_a=0.05f, "stride_depth_offset"_a=0.002f, "use_random_seed"_a=false, "image_size"_a=2000)
+        .def_property("name", &DepthModel::name, &DepthModel::set_name)
         ;
 
     //--------------------------//
@@ -330,6 +336,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
     py::class_<Modality, PyModality, std::shared_ptr<Modality>>(m, "Modality")
         .def_property_readonly("gradient", &Modality::gradient)
         .def_property_readonly("hessian", &Modality::hessian)
+        .def_property("name", &Modality::name, &Modality::set_name)
         ;
 
     // RegionModality

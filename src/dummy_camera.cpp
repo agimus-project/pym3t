@@ -44,6 +44,10 @@ void DummyColorCamera::set_image(const cv::Mat& img){
   image_ = img;
 }
 
+const Intrinsics& DummyColorCamera::get_intrinsics() const {
+  return intrinsics_;
+}
+
 void DummyColorCamera::set_intrinsics(const Intrinsics& _intrinsics)
 {
   intrinsics_ = _intrinsics;
@@ -66,9 +70,6 @@ bool DummyColorCamera::UpdateImage(bool synchronized) {
   return true;
 }
 
-const Intrinsics& DummyColorCamera::get_intrinsics() const {
-  return intrinsics_;
-}
 
 bool DummyColorCamera::LoadMetaData() {
   // Open file storage from yaml
