@@ -152,6 +152,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def("AddBody", &RendererGeometry::AddBody)
         .def("DeleteBody", &RendererGeometry::DeleteBody)
         .def("ClearBodies", &RendererGeometry::ClearBodies)
+        .def_property_readonly("name", &RendererGeometry::name)
         ;
 
     //--------------------------//
@@ -174,6 +175,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def("StartSavingImages", &PyViewer::StartSavingImages, "save_directory"_a, "save_image_type"_a)
         .def("StopSavingImages", &PyViewer::StopSavingImages)
         .def("save_images", &PyViewer::save_images)
+        .def_property("name", &PyViewer::name, &PyViewer::set_name)
         .def_property("display_images", &PyViewer::display_images, &PyViewer::set_display_images)
         ;
     
