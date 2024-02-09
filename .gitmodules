@@ -1,4 +1,0 @@
-[submodule "extern/3DObjectTracking"]
-	path = extern/3DObjectTracking
-	url = git@github.com:DLR-RM/3DObjectTracking.git
-	branch = master
