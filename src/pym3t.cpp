@@ -14,7 +14,11 @@
 // M3T
 #include <m3t/common.h>
 #include <m3t/camera.h>
+
+#ifdef PYM3T_WITH_REALSENSE
 #include <m3t/realsense_camera.h>
+#endif
+
 #include <m3t/renderer_geometry.h>
 #include <m3t/basic_depth_renderer.h>
 #include <m3t/silhouette_renderer.h>
@@ -37,13 +41,6 @@ namespace py = pybind11;
 using namespace pybind11::literals;  // to use "arg"_a shorthand
 using namespace m3t;
 using namespace Eigen;
-
-/**
- * TODO: 
- * - Read the flag USE_REALSENSE to decide whether or not to create bindings
- * */ 
-
-
 
 PYBIND11_MODULE(_pym3t_mod, m) {
 
@@ -119,6 +116,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
     // DepthCamera -> not constructible, just to enable automatic downcasting and binding of child classes
     py::class_<DepthCamera, Camera, std::shared_ptr<DepthCamera>>(m, "DepthCamera");
 
+#ifdef PYM3T_WITH_REALSENSE
     // RealSenseColorCamera
     py::class_<RealSenseColorCamera, ColorCamera, std::shared_ptr<RealSenseColorCamera>>(m, "RealSenseColorCamera")
         .def(py::init<const std::string &, bool>(), "name"_a, "use_depth_as_world_frame"_a=false)
@@ -128,6 +126,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
     py::class_<RealSenseDepthCamera, DepthCamera, std::shared_ptr<RealSenseDepthCamera>>(m, "RealSenseDepthCamera")
         .def(py::init<const std::string &, bool>(), "name"_a, "use_color_as_world_frame"_a=true)
         ;
+#endif
 
     // DummyColorCamera
     py::class_<DummyColorCamera, ColorCamera, std::shared_ptr<DummyColorCamera>>(m, "DummyColorCamera")
@@ -443,5 +442,13 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def_property("tikhonov_parameter_rotation", &Optimizer::tikhonov_parameter_rotation, &Optimizer::set_tikhonov_parameter_rotation)
         .def_property("tikhonov_parameter_translation", &Optimizer::tikhonov_parameter_translation, &Optimizer::set_tikhonov_parameter_translation)
         ;
+
+    // Constants
+    m.attr("WITH_REALSENSE") = 
+#ifdef PYM3T_WITH_REALSENSE
+      py::bool_(true);
+#else
+      py::bool_(false);
+#endif
 
 }

@@ -2,13 +2,22 @@ A python wrapper around M3T tracker from https://github.com/DLR-RM/3DObjectTrack
 
 # Installation
 
-`git clone git@github.com:MedericFourmy/pym3t.git --recursive`
+```
+git clone https://github.com/agimus-project/pym3t.git
+cd pym3t
+conda env create --name pym3t --file environment.yaml
+conda activate pym3t
+pip install .
+```
 
-Install dependencies with conda:  
-`conda env create --name pym3t --file environment.yaml`  
+## Install with Realsense support
+PYM3T by defult builds without Intel Realsense support. To enable it first install librealsense following the [official guide](https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md#installing-the-packages).
 
-Then  
-`pip install .`
+Nex build the package with a following command:
+```
+# TODO instruct on how to pass CMake flags
+pip install . 
+```
 
 # Example scripts
 As example of usage of the library, scripts are provided: 
