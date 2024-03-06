@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.11)
 project(pym3t LANGUAGES CXX)
 
 option(USE_AZURE_KINECT "Use Azure Kinect" OFF)
-option(USE_REALSENSE "Use RealSense D435" ON)
+option(USE_REALSENSE "Use RealSense D435" OFF)
 option(USE_GTEST "Use gtest" OFF)
 option(USE_XFEATURES2D "Use OpenCV xfeatures2d" OFF)
 
@@ -11,6 +11,11 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.27.0")
 endif()
 
 # set(CMAKE_BUILD_TYPE "RELEASE") set(CMAKE_BUILD_TYPE "DEBUG")
+
+IF(USE_REALSENSE)
+  ADD_DEFINITIONS(-DPYM3T_WITH_REALSENSE)
+  LIST(APPEND CFLAGS_DEPENDENCIES "-DPYM3T_WITH_REALSENSE")
+ENDIF(USE_REALSENSE)
 
 include(FetchContent)
 FetchContent_Declare(
