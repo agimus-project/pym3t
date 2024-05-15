@@ -4,6 +4,7 @@ project(pym3t LANGUAGES CXX)
 option(USE_AZURE_KINECT "Use Azure Kinect" OFF)
 option(USE_REALSENSE "Use RealSense D435" ON)
 option(USE_GTEST "Use gtest" OFF)
+option(USE_XFEATURES2D "Use OpenCV xfeatures2d" OFF)
 
 cmake_policy(SET CMP0148 OLD) # required for current pybind11
 
@@ -19,7 +20,7 @@ FetchContent_Declare(
   GIT_REPOSITORY "https://github.com/agimus-project/3DObjectTracking"
   GIT_TAG "master"
   SOURCE_SUBDIR "M3T" CMAKE_ARGS "-DUSE_AZURE_KINECT=${USE_AZURE_KINECT}"
-  "-DUSE_REALSENSE=${USE_REALSENSE}" "-DUSE_GTEST=${USE_GTEST}")
+  "-DUSE_REALSENSE=${USE_REALSENSE}" "-DUSE_GTEST=${USE_GTEST}" "-DUSE_XFEATURES2D=${USE_XFEATURES2D}")
 FetchContent_MakeAvailable(pybind11 m3t)
 
 # Create library for the extensions to m3t
