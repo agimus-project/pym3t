@@ -16,7 +16,7 @@ FetchContent_Declare(
   GIT_TAG "v2.11.1")
 FetchContent_Declare(
   m3t
-  GIT_REPOSITORY "https://github.com/DLR-RM/3DObjectTracking.git"
+  GIT_REPOSITORY "https://github.com/agimus-project/3DObjectTracking"
   GIT_TAG "master"
   SOURCE_SUBDIR "M3T" CMAKE_ARGS "-DUSE_AZURE_KINECT=${USE_AZURE_KINECT}"
   "-DUSE_REALSENSE=${USE_REALSENSE}" "-DUSE_GTEST=${USE_GTEST}")
