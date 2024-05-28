@@ -300,6 +300,20 @@ PYBIND11_MODULE(_pym3t_mod, m) {
 
     //--------------------------//
 
+    // ColorHistograms
+    py::class_<ColorHistograms, std::shared_ptr<ColorHistograms>>(m, "ColorHistograms")
+        .def(py::init<const std::string &, int, float, float>(),
+                      "name"_a, 
+                      "n_bins"_a=16, "learning_rate_f"_a=0.2f, "learning_rate_b"_a=0.2f)
+        .def("SetUp", &ColorHistograms::SetUp)
+        .def_property("name", &ColorHistograms::name, &ColorHistograms::set_name)
+        .def_property("n_bins", &ColorHistograms::n_bins, &ColorHistograms::set_n_bins)
+        .def_property("learning_rate_f", &ColorHistograms::learning_rate_f, &ColorHistograms::set_learning_rate_f)
+        .def_property("learning_rate_b", &ColorHistograms::learning_rate_b, &ColorHistograms::set_learning_rate_b)
+        ;
+
+    //--------------------------//
+
     // RegionModel
     py::class_<RegionModel, std::shared_ptr<RegionModel>>(m, "RegionModel")
         .def(py::init<const std::string &, const std::shared_ptr<Body> &, const std::filesystem::path &, 
@@ -371,6 +385,9 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def_property("n_global_iterations", &RegionModality::n_global_iterations, &RegionModality::set_n_global_iterations)
         .def_property("scales", &RegionModality::scales, &RegionModality::set_scales)
         .def_property("standard_deviations", &RegionModality::standard_deviations, &RegionModality::set_standard_deviations)
+
+        .def("UseSharedColorHistograms", &RegionModality::UseSharedColorHistograms, "color_histograms_ptr"_a)
+        .def("DoNotUseSharedColorHistograms", &RegionModality::DoNotUseSharedColorHistograms)
 
         .def_property("n_histogram_bins", &RegionModality::n_histogram_bins, &RegionModality::set_n_histogram_bins)
         .def_property("learning_rate_f", &RegionModality::learning_rate_f, &RegionModality::set_learning_rate_f)
