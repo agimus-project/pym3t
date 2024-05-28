@@ -1,4 +1,5 @@
 from ._pym3t_mod import Tracker
+from ._pym3t_mod import ColorHistograms
 from ._pym3t_mod import RendererGeometry
 from ._pym3t_mod import Intrinsics, IDType
 from ._pym3t_mod import DummyColorCamera, DummyDepthCamera
@@ -14,7 +15,8 @@ from ._pym3t_mod import WITH_REALSENSE
 if WITH_REALSENSE:
     from ._pym3t_mod import RealSenseColorCamera, RealSenseDepthCamera
 
-__all__ = ['Tracker', 
+__all__ = ['Tracker',
+           'ColorHistograms', 
            'RendererGeometry',
            'Intrinsics', 'IDType',
            'DummyColorCamera', 'DummyDepthCamera', 
