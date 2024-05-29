@@ -66,6 +66,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def("AddViewer", &Tracker::AddViewer)
         .def("AddDetector", &Tracker::AddDetector)
         .def("AddOptimizer", &Tracker::AddOptimizer)
+        .def("ClearOptimizers", &Tracker::ClearOptimizers)
         .def_property("name", &Tracker::name, &Tracker::set_name)
         .def_property("n_corr_iterations", &Tracker::n_corr_iterations, &Tracker::set_n_corr_iterations)
         .def_property("n_update_iterations", &Tracker::n_update_iterations, &Tracker::set_n_update_iterations)
