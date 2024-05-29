@@ -70,6 +70,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def_property("name", &Tracker::name, &Tracker::set_name)
         .def_property("n_corr_iterations", &Tracker::n_corr_iterations, &Tracker::set_n_corr_iterations)
         .def_property("n_update_iterations", &Tracker::n_update_iterations, &Tracker::set_n_update_iterations)
+        .def_property_readonly("set_up", &Tracker::set_up)
         .def_property_readonly("optimizers", &Tracker::optimizer_ptrs)
         ;
 
