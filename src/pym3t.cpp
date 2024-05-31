@@ -66,9 +66,12 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def("AddViewer", &Tracker::AddViewer)
         .def("AddDetector", &Tracker::AddDetector)
         .def("AddOptimizer", &Tracker::AddOptimizer)
+        .def("ClearOptimizers", &Tracker::ClearOptimizers)
         .def_property("name", &Tracker::name, &Tracker::set_name)
         .def_property("n_corr_iterations", &Tracker::n_corr_iterations, &Tracker::set_n_corr_iterations)
         .def_property("n_update_iterations", &Tracker::n_update_iterations, &Tracker::set_n_update_iterations)
+        .def_property_readonly("set_up", &Tracker::set_up)
+        .def_property_readonly("optimizers", &Tracker::optimizer_ptrs)
         ;
 
     //--------------------------//
@@ -263,6 +266,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def("AddModality", &Link::AddModality)
         .def("CalculateGradientAndHessian", &Link::CalculateGradientAndHessian)
         .def_property("name", &Link::name, &Link::set_name)
+        .def_property("body", &Link::body_ptr, &Link::set_body_ptr)
         .def_property("link2world_pose", &Link::link2world_pose, &Link::set_link2world_pose)
         .def_property_readonly("modalities", &Link::modality_ptrs)
         .def("gradient", &Link::gradient)
@@ -522,6 +526,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def_property("metafile_path", &Optimizer::metafile_path, &Optimizer::set_metafile_path)
         .def_property("tikhonov_parameter_rotation", &Optimizer::tikhonov_parameter_rotation, &Optimizer::set_tikhonov_parameter_rotation)
         .def_property("tikhonov_parameter_translation", &Optimizer::tikhonov_parameter_translation, &Optimizer::set_tikhonov_parameter_translation)
+        .def_property_readonly("root_link", &Optimizer::root_link_ptr)
         ;
 
     // Constants
