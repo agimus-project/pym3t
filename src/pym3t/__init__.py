@@ -8,7 +8,7 @@ from ._pym3t_mod import FocusedBasicDepthRenderer, FocusedSilhouetteRenderer
 from ._pym3t_mod import Body, Link
 from ._pym3t_mod import StaticDetector
 from ._pym3t_mod import RegionModel, DepthModel
-from ._pym3t_mod import RegionModality, DepthModality, TextureModality
+from ._pym3t_mod import RegionModality, DepthModality, TextureModality, DescriptorType
 from ._pym3t_mod import Optimizer
 from ._pym3t_mod import WITH_REALSENSE
 
@@ -25,7 +25,7 @@ __all__ = ['Tracker',
            'Body', 'Link', 
            'StaticDetector', 
            'RegionModel', 'DepthModel', 
-           'RegionModality', 'DepthModality', 'TextureModality' 
+           'RegionModality', 'DepthModality', 'TextureModality', 'DescriptorType'
            'Optimizer',] 
 
 if WITH_REALSENSE:

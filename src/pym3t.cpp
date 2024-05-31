@@ -453,6 +453,17 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def_property("visualize_points_result", &DepthModality::visualize_points_result, &DepthModality::set_visualize_points_result)
         ;
 
+    py::enum_<TextureModality::DescriptorType>(m, "DescriptorType")
+        .value("BRISK", TextureModality::DescriptorType::BRISK)
+        .value("DAISY", TextureModality::DescriptorType::DAISY)
+        .value("FREAK", TextureModality::DescriptorType::FREAK)
+        .value("SIFT", TextureModality::DescriptorType::SIFT)
+        .value("ORB", TextureModality::DescriptorType::ORB)
+#ifdef USE_CUDA
+        .value("ORB_CUDA", TextureModality::DescriptorType::ORB_CUDA)
+#endif
+        .export_values();
+
 
     // TextureModality
     py::class_<TextureModality, Modality, std::shared_ptr<TextureModality>>(m, "TextureModality")
@@ -464,6 +475,42 @@ PYBIND11_MODULE(_pym3t_mod, m) {
 
         .def("ModelOcclusions", &TextureModality::ModelOcclusions)
         .def("MeasureOcclusions", &TextureModality::MeasureOcclusions)
+
+        .def_property("descriptor_type", &TextureModality::descriptor_type, &TextureModality::set_descriptor_type)
+        .def_property("focused_image_size", &TextureModality::focused_image_size, &TextureModality::set_focused_image_size)
+        .def_property("descriptor_distance_threshold", &TextureModality::descriptor_distance_threshold, &TextureModality::set_descriptor_distance_threshold)
+        .def_property("tukey_norm_constant", &TextureModality::tukey_norm_constant, &TextureModality::set_tukey_norm_constant)
+        .def_property("standard_deviations", &TextureModality::standard_deviations, &TextureModality::set_standard_deviations)
+        .def_property("max_keyframe_rotation_difference", &TextureModality::max_keyframe_rotation_difference, &TextureModality::set_max_keyframe_rotation_difference)
+        .def_property("max_keyframe_age", &TextureModality::max_keyframe_age, &TextureModality::set_max_keyframe_age)
+        .def_property("n_keyframes", &TextureModality::n_keyframes, &TextureModality::set_n_keyframes)
+
+        .def_property("orb_n_features", &TextureModality::orb_n_features, &TextureModality::set_orb_n_features)
+        .def_property("orb_scale_factor", &TextureModality::orb_scale_factor, &TextureModality::set_orb_scale_factor)
+        .def_property("orb_n_levels", &TextureModality::orb_n_levels, &TextureModality::set_orb_n_levels)
+        .def_property("brisk_threshold", &TextureModality::brisk_threshold, &TextureModality::set_brisk_threshold)
+        .def_property("brisk_octave", &TextureModality::brisk_octave, &TextureModality::set_brisk_octave)
+        .def_property("brisk_pattern_scale", &TextureModality::brisk_pattern_scale, &TextureModality::set_brisk_pattern_scale)
+        .def_property("daisy_radius", &TextureModality::daisy_radius, &TextureModality::set_daisy_radius)
+        .def_property("daisy_q_radius", &TextureModality::daisy_q_radius, &TextureModality::set_daisy_q_radius)
+        .def_property("daisy_q_theta", &TextureModality::daisy_q_theta, &TextureModality::set_daisy_q_theta)
+        .def_property("daisy_q_hist", &TextureModality::daisy_q_hist, &TextureModality::set_daisy_q_hist)
+        .def_property("freak_orientation_normalized", &TextureModality::freak_orientation_normalized, &TextureModality::set_freak_orientation_normalized)
+        .def_property("freak_scale_normalized", &TextureModality::freak_scale_normalized, &TextureModality::set_freak_scale_normalized)
+        .def_property("freak_pattern_scale", &TextureModality::freak_pattern_scale, &TextureModality::set_freak_pattern_scale)
+        .def_property("freak_n_octaves", &TextureModality::freak_n_octaves, &TextureModality::set_freak_n_octaves)
+        .def_property("sift_n_features", &TextureModality::sift_n_features, &TextureModality::set_sift_n_features)
+        .def_property("sift_n_octave_layers", &TextureModality::sift_n_octave_layers, &TextureModality::set_sift_n_octave_layers)
+        .def_property("sift_contrast_threshold", &TextureModality::sift_contrast_threshold, &TextureModality::set_sift_contrast_threshold)
+        .def_property("sift_edge_threshold", &TextureModality::sift_edge_threshold, &TextureModality::set_sift_edge_threshold)
+        .def_property("sift_sigma", &TextureModality::sift_sigma, &TextureModality::set_sift_sigma)
+
+        .def_property("measured_occlusion_radius", &TextureModality::measured_occlusion_radius, &TextureModality::set_measured_occlusion_radius)
+        .def_property("measured_occlusion_threshold", &TextureModality::measured_occlusion_threshold, &TextureModality::set_measured_occlusion_threshold)
+        .def_property("modeled_occlusion_radius", &TextureModality::modeled_occlusion_radius, &TextureModality::set_modeled_occlusion_radius)
+        .def_property("modeled_occlusion_threshold", &TextureModality::modeled_occlusion_threshold, &TextureModality::set_modeled_occlusion_threshold)
+
+
         ;
 
     // Optimizer
