@@ -7,3 +7,4 @@ tmp/
 examples/tmp/
 EXAMPLE_RUN.txt
 tests/__pycache__
+COLCON_IGNORE
