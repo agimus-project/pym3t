@@ -72,6 +72,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def_property("n_update_iterations", &Tracker::n_update_iterations, &Tracker::set_n_update_iterations)
         .def_property_readonly("set_up", &Tracker::set_up)
         .def_property_readonly("optimizers", &Tracker::optimizer_ptrs)
+        .def_property_readonly("modalities", &Tracker::modality_ptrs)
         ;
 
     //--------------------------//
