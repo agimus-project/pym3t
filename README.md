@@ -1,70 +1,98 @@
-A python wrapper around M3T tracker from https://github.com/DLR-RM/3DObjectTracking/tree/master
+# PYM3T
 
-# Installation
+A python wrapper around M3T tracker from [DLR-RM/3DObjectTracking](https://github.com/DLR-RM/3DObjectTracking/tree/master).
 
-`git clone git@github.com:MedericFourmy/pym3t.git --recursive`
+## Installation
 
-Install dependencies with conda:  
-`conda env create --name pym3t --file environment.yaml`  
+To install pym3t, you can use pip or poetry.
 
-Then  
-`pip install .`
+We strongly suggest to install it in either a
+[venv](https://docs.python.org/fr/3/library/venv.html) or a
+[conda environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
+
+### Example with conda
+
+```
+git clone https://github.com/agimus-project/pym3t
+cd pym3t
+conda env create -f environment.yml
+conda activate pym3t
+pip install .
+```
+
+### Example with venv
+
+> [!NOTE]
+> M3T relies on [GLFW](https://www.glfw.org/). Before building ensure it is installed.
+> For Ubuntu run `apt-get install libglfw3 libglfw3-dev`
+
+
+```
+git clone https://github.com/agimus-project/pym3t
+cd pym3t
+python -m venv .venv
+source .venv/bin/activate
+pip install .
+```
 
 # Example scripts
-As example of usage of the library, scripts are provided: 
-* `run_image_dir_example.py`: single object tracking using color and depth images from filesystem
-* `run_webcam_example.py`: single object tracking with first camera device detected by the system (webcam or other usb camera usually)
-* `run_realsense_example.py`: single object tracking with realsense camera
+As example usage of the library, we provide several scripts: 
+* `run_image_dir_example.py`: single object tracking using color and depth images from filesystem;
+* `run_webcam_example.py`: single object tracking with first camera device detected by the system (webcam or other usb camera usually);
+* `run_realsense_example.py`: single object tracking with realsense camera.
 
-:question:: check available options with `python <script>.py -h`
+> [!IMPORTANT]
+> For all examples, you need a object mesh in the Wavefront **.obj** format with name **<object_id>.obj**. Upon first execution, a set of sparse template views are generated which can take some time.
 
-For all examples, you need a object mesh in the wavefront .obj format with name <object_id>.obj. Upon first execution, a set of sparse template views are generated which can take some time.
+> [!TIP]
+> Check available options with `python <script name>.py -h`
 
 ## Running image per image  
 ----
-For this example you need a set of of recorded sequential color (and potentially depth) images stored in a directory.
-The color images `color*.png` and `depth*.png` need have names with lexicographic order (e.g. color_000000.png, color_000001.png, color_000002.png...)
+To run this example you need a set of of recorded sequential color (and potentially depth) images stored in a directory.
+The color images **color\*.png** and **depth\*.png** need to have names with lexicographic order (e.g. *color_000000.png*, *color_000001.png*, *color_000002.png*, ...)
 Calibrated camera intrinsics in the formate described in config/cam_d435_640.yaml also need to be provided.
 
 Color only:   
-```
+``` bash
 python examples/run_image_dir_example.py --use_region -b obj_000014 -m <path/to/obj/dir> -i <path/to/image/dir> -c config/cam_d435_640.yaml --stop
 ```
 
 Color + depth:   
-```
+``` bash
 python examples/run_image_dir_example.py --use_region --use_depth -b obj_000014 -m <path/to/obj/dir> -i <path/to/image/dir> -c config/cam_d435_640.yaml --stop
 ```
 
 Keyboard commands:
-- `q`: exit
-- `any other key`: When running with --stop/-s argument, continue to next image
+- `q`: exit;
+- `any other key`: When running with **--stop** or **-s** argument, continue to next image.
 
 ## Running with webcam
-To bypass camera calibration, a reasonable horizontal fov (~50-70 degrees) can be assumed to get camera intrinsics
-```
+To bypass camera calibration, a reasonable horizontal fov (50 - 70 degrees) can be assumed to get camera intrinsics
+``` bash
 python examples/run_webcam_example.py --use_region -b obj_000014 -m <path/to/obj/dir>
 ```
 
 Keyboard commands:
-- `q`: exit
-- `d`: reset object pose to initial guess
-- `x`: start/restart tracking
+- `q`: exit;
+- `d`: reset object pose to initial guess;
+- `x`: start/restart tracking.
 
 ## Running with realsense camera
 ----
 Color only:   
-```
+```bash
 python examples/run_realsense_example.py --use_region -b obj_000014 -m <path/to/obj/dir>
 ```
 
 ----
+
 Color + depth:   
-```
+```bash
 python examples/run_realsense_example.py --use_region --use_depth -b obj_000014 -m <path/to/obj/dir>
 ```
 
 Keyboard commands:
-- `q`: exit
-- `d`: initialize object pose
-- `x`: start/restart tracking
+- `q`: exit;
+- `d`: initialize object pose;
+- `x`: start/restart tracking.
