@@ -66,9 +66,13 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def("AddViewer", &Tracker::AddViewer)
         .def("AddDetector", &Tracker::AddDetector)
         .def("AddOptimizer", &Tracker::AddOptimizer)
+        .def("ClearOptimizers", &Tracker::ClearOptimizers)
         .def_property("name", &Tracker::name, &Tracker::set_name)
         .def_property("n_corr_iterations", &Tracker::n_corr_iterations, &Tracker::set_n_corr_iterations)
         .def_property("n_update_iterations", &Tracker::n_update_iterations, &Tracker::set_n_update_iterations)
+        .def_property_readonly("set_up", &Tracker::set_up)
+        .def_property_readonly("optimizers", &Tracker::optimizer_ptrs)
+        .def_property_readonly("modalities", &Tracker::modality_ptrs)
         ;
 
     //--------------------------//
@@ -119,11 +123,13 @@ PYBIND11_MODULE(_pym3t_mod, m) {
 #ifdef PYM3T_WITH_REALSENSE
     // RealSenseColorCamera
     py::class_<RealSenseColorCamera, ColorCamera, std::shared_ptr<RealSenseColorCamera>>(m, "RealSenseColorCamera")
+        .def("SetUp", &RealSenseColorCamera::SetUp)
         .def(py::init<const std::string &, bool>(), "name"_a, "use_depth_as_world_frame"_a=false)
         ;
 
     // RealSenseDepthCamera
     py::class_<RealSenseDepthCamera, DepthCamera, std::shared_ptr<RealSenseDepthCamera>>(m, "RealSenseDepthCamera")
+        .def("SetUp", &RealSenseDepthCamera::SetUp)
         .def(py::init<const std::string &, bool>(), "name"_a, "use_color_as_world_frame"_a=true)
         ;
 #endif
@@ -131,6 +137,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
     // DummyColorCamera
     py::class_<DummyColorCamera, ColorCamera, std::shared_ptr<DummyColorCamera>>(m, "DummyColorCamera")
         .def(py::init<const std::string &>(), "name"_a)
+        .def("SetUp", &DummyColorCamera::SetUp)
         .def_property("image", &Camera::image, &DummyColorCamera::set_image)
         .def_property("intrinsics", &DummyColorCamera::get_intrinsics, &DummyColorCamera::set_intrinsics)
         ;
@@ -138,6 +145,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
     // DummyDepthCamera
     py::class_<DummyDepthCamera, DepthCamera, std::shared_ptr<DummyDepthCamera>>(m, "DummyDepthCamera")
         .def(py::init<const std::string &, float>(), "name"_a, "depth_scale"_a=0.001)
+        .def("SetUp", &DummyDepthCamera::SetUp)
         .def_property("image", &Camera::image, &DummyDepthCamera::set_image)
         .def_property("intrinsics", &DummyDepthCamera::get_intrinsics, &DummyDepthCamera::set_intrinsics)
         .def_property("depth_scale", &DummyDepthCamera::depth_scale, &DummyDepthCamera::set_depth_scale)
@@ -148,6 +156,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
     // RendererGeometry
     py::class_<RendererGeometry, std::shared_ptr<RendererGeometry>>(m, "RendererGeometry")
         .def(py::init<const std::string &>(), "name"_a)
+        .def("SetUp", &RendererGeometry::SetUp)
         .def("AddBody", &RendererGeometry::AddBody)
         .def("DeleteBody", &RendererGeometry::DeleteBody)
         .def("ClearBodies", &RendererGeometry::ClearBodies)
@@ -191,6 +200,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
     py::class_<NormalDepthViewer, Viewer, std::shared_ptr<NormalDepthViewer>>(m, "NormalDepthViewer")
         .def(py::init<const std::string &, const std::shared_ptr<DepthCamera> &, const std::shared_ptr<RendererGeometry> &, float, float, float>(),
                       "name"_a, "depth_camera_ptr"_a, "renderer_geometry_ptr"_a, "min_depth"_a=0.0f, "max_depth"_a=1.0f, "opacity"_a=0.5f)
+        .def("SetUp", &NormalDepthViewer::SetUp)
         .def("UpdateViewer", &NormalDepthViewer::UpdateViewer, "save_index"_a)
         .def("set_opacity", &NormalDepthViewer::set_opacity, "opacity"_a)
         ;
@@ -210,6 +220,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
     py::class_<FocusedBasicDepthRenderer, FocusedDepthRenderer, std::shared_ptr<FocusedBasicDepthRenderer>>(m, "FocusedBasicDepthRenderer")
         .def(py::init<const std::string &, const std::shared_ptr<RendererGeometry> &, const std::shared_ptr<Camera> &, int, float, float>(),
                       "name"_a, "renderer_geometry_ptr"_a, "camera_ptr"_a, "image_size"_a=200, "z_min"_a=0.01f, "z_max"_a=5.0f)
+        .def("SetUp", &FocusedBasicDepthRenderer::SetUp)
         .def("AddReferencedBody", &FocusedBasicDepthRenderer::AddReferencedBody)
         ;
 
@@ -219,6 +230,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
                       "name"_a, "renderer_geometry_ptr"_a, "camera_ptr"_a, "id_type"_a=IDType::BODY, "image_size"_a=200, "z_min"_a=0.01f, "z_max"_a=5.0f)       
         .def(py::init<const std::string &, const std::filesystem::path&, const std::shared_ptr<RendererGeometry> &, const std::shared_ptr<Camera>&>(),
                       "name"_a, "metafile_path"_a, "renderer_geometry_ptr"_a, "camera_ptr"_a)       
+        .def("SetUp", &FocusedSilhouetteRenderer::SetUp)
         .def("AddReferencedBody", &FocusedSilhouetteRenderer::AddReferencedBody)
         ;
 
@@ -230,6 +242,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def(py::init<const std::string &, const std::filesystem::path &, float, bool, bool, const Transform3fA &>(),
                       "name"_a, "geometry_path"_a, "geometry_unit_in_meter"_a, "geometry_counterclockwise"_a, "geometry_enable_culling"_a, "geometry2body_pose"_a)
         .def(py::init<const std::string &, const std::filesystem::path &>(), "name"_a, "metafile_path"_a)
+        .def("SetUp", &Body::SetUp)
         .def_property("name", &Body::name, &Body::set_name)
         .def_property("geometry_path", &Body::geometry_path, &Body::set_geometry_path)
         .def_property("metafile_path", &Body::metafile_path, &Body::set_metafile_path)
@@ -250,9 +263,11 @@ PYBIND11_MODULE(_pym3t_mod, m) {
                       "body2joint_pose"_a=Transform3fA::Identity(), "joint2parent_pose"_a=Transform3fA::Identity(), "link2world_pose"_a=Transform3fA::Identity(),
                       "free_directions"_a=std::array<bool, 6>({true, true, true, true, true, true}), "fixed_body2joint_pose"_a=true)
         .def(py::init<const std::string &, const std::filesystem::path &, const std::shared_ptr<Body> &>(), "name"_a, "metafile_path"_a, "body_ptr"_a)
+        .def("SetUp", &Link::SetUp)
         .def("AddModality", &Link::AddModality)
         .def("CalculateGradientAndHessian", &Link::CalculateGradientAndHessian)
         .def_property("name", &Link::name, &Link::set_name)
+        .def_property("body", &Link::body_ptr, &Link::set_body_ptr)
         .def_property("link2world_pose", &Link::link2world_pose, &Link::set_link2world_pose)
         .def_property_readonly("modalities", &Link::modality_ptrs)
         .def("gradient", &Link::gradient)
@@ -274,6 +289,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
 
     // Detector
     py::class_<Detector, PyDetector, std::shared_ptr<Detector>>(m, "Detector")
+        .def("SetUp", &Detector::SetUp)
         .def_property("name", &Detector::name, &Detector::set_name)
     ;
 
@@ -289,12 +305,27 @@ PYBIND11_MODULE(_pym3t_mod, m) {
 
     //--------------------------//
 
+    // ColorHistograms
+    py::class_<ColorHistograms, std::shared_ptr<ColorHistograms>>(m, "ColorHistograms")
+        .def(py::init<const std::string &, int, float, float>(),
+                      "name"_a, 
+                      "n_bins"_a=16, "learning_rate_f"_a=0.2f, "learning_rate_b"_a=0.2f)
+        .def("SetUp", &ColorHistograms::SetUp)
+        .def_property("name", &ColorHistograms::name, &ColorHistograms::set_name)
+        .def_property("n_bins", &ColorHistograms::n_bins, &ColorHistograms::set_n_bins)
+        .def_property("learning_rate_f", &ColorHistograms::learning_rate_f, &ColorHistograms::set_learning_rate_f)
+        .def_property("learning_rate_b", &ColorHistograms::learning_rate_b, &ColorHistograms::set_learning_rate_b)
+        ;
+
+    //--------------------------//
+
     // RegionModel
     py::class_<RegionModel, std::shared_ptr<RegionModel>>(m, "RegionModel")
         .def(py::init<const std::string &, const std::shared_ptr<Body> &, const std::filesystem::path &, 
                       float, int, int, float, float, bool, int>(),
                       "name"_a, "body_ptr"_a, "model_path"_a, 
                       "sphere_radius"_a=0.8f, "n_divides"_a=4, "n_points_max"_a=200, "max_radius_depth_offset"_a=0.05f, "stride_depth_offset"_a=0.002f, "use_random_seed"_a=false, "image_size"_a=2000)
+        .def("SetUp", &RegionModel::SetUp)
         .def_property("name", &RegionModel::name, &RegionModel::set_name)
         ;
 
@@ -304,6 +335,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
                       float, int, int, float, float, bool, int>(),
                       "name"_a, "body_ptr"_a, "model_path"_a, 
                       "sphere_radius"_a=0.8f, "n_divides"_a=4, "n_points_max"_a=200, "max_radius_depth_offset"_a=0.05f, "stride_depth_offset"_a=0.002f, "use_random_seed"_a=false, "image_size"_a=2000)
+        .def("SetUp", &DepthModel::SetUp)
         .def_property("name", &DepthModel::name, &DepthModel::set_name)
         ;
 
@@ -335,6 +367,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
 
     // Modality -> not constructible, just to enable automatic downcasting and binding of child classes
     py::class_<Modality, PyModality, std::shared_ptr<Modality>>(m, "Modality")
+        .def("SetUp", &Modality::SetUp)
         .def_property_readonly("gradient", &Modality::gradient)
         .def_property_readonly("hessian", &Modality::hessian)
         .def_property("name", &Modality::name, &Modality::set_name)
@@ -344,6 +377,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
     py::class_<RegionModality, Modality, std::shared_ptr<RegionModality>>(m, "RegionModality")
         .def(py::init<const std::string &, const std::shared_ptr<Body> &, const std::shared_ptr<ColorCamera> &, const std::shared_ptr<RegionModel> &>(),
                       "name"_a, "body_ptr"_a, "color_camera_ptr"_a, "region_model_ptr"_a)
+        .def("SetUp", &RegionModality::SetUp)
         .def_property("n_lines_max", &RegionModality::n_lines_max, &RegionModality::set_n_lines_max)
         .def_property("use_adaptive_coverage", &RegionModality::use_adaptive_coverage, &RegionModality::set_use_adaptive_coverage)
         .def_property("reference_contour_length", &RegionModality::reference_contour_length, &RegionModality::set_reference_contour_length)
@@ -356,6 +390,9 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def_property("n_global_iterations", &RegionModality::n_global_iterations, &RegionModality::set_n_global_iterations)
         .def_property("scales", &RegionModality::scales, &RegionModality::set_scales)
         .def_property("standard_deviations", &RegionModality::standard_deviations, &RegionModality::set_standard_deviations)
+
+        .def("UseSharedColorHistograms", &RegionModality::UseSharedColorHistograms, "color_histograms_ptr"_a)
+        .def("DoNotUseSharedColorHistograms", &RegionModality::DoNotUseSharedColorHistograms)
 
         .def_property("n_histogram_bins", &RegionModality::n_histogram_bins, &RegionModality::set_n_histogram_bins)
         .def_property("learning_rate_f", &RegionModality::learning_rate_f, &RegionModality::set_learning_rate_f)
@@ -393,6 +430,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
     py::class_<DepthModality, Modality, std::shared_ptr<DepthModality>>(m, "DepthModality")
         .def(py::init<const std::string &, const std::shared_ptr<Body> &, const std::shared_ptr<DepthCamera> &, const std::shared_ptr<DepthModel> &>(),
                       "name"_a, "body_ptr"_a, "depth_camera_ptr"_a, "depth_model_ptr"_a)
+        .def("SetUp", &DepthModality::SetUp)
 
         .def_property("n_points_max", &DepthModality::n_points_max, &DepthModality::set_n_points_max)
         .def_property("use_adaptive_coverage", &DepthModality::use_adaptive_coverage, &DepthModality::set_use_adaptive_coverage)
@@ -420,6 +458,17 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def_property("visualize_points_result", &DepthModality::visualize_points_result, &DepthModality::set_visualize_points_result)
         ;
 
+    py::enum_<TextureModality::DescriptorType>(m, "DescriptorType")
+        .value("BRISK", TextureModality::DescriptorType::BRISK)
+        .value("DAISY", TextureModality::DescriptorType::DAISY)
+        .value("FREAK", TextureModality::DescriptorType::FREAK)
+        .value("SIFT", TextureModality::DescriptorType::SIFT)
+        .value("ORB", TextureModality::DescriptorType::ORB)
+#ifdef USE_CUDA
+        .value("ORB_CUDA", TextureModality::DescriptorType::ORB_CUDA)
+#endif
+        .export_values();
+
 
     // TextureModality
     py::class_<TextureModality, Modality, std::shared_ptr<TextureModality>>(m, "TextureModality")
@@ -427,9 +476,46 @@ PYBIND11_MODULE(_pym3t_mod, m) {
                       "name"_a, "body_ptr"_a, "color_camera_ptr"_a, "silhouette_renderer_ptr"_a)
         .def(py::init<const std::string &, const std::filesystem::path &, const std::shared_ptr<Body> &, const std::shared_ptr<ColorCamera> &, const std::shared_ptr<FocusedSilhouetteRenderer>&>(),
                       "name"_a, "metafile_path"_a, "body_ptr"_a, "color_camera_ptr"_a, "silhouette_renderer_ptr"_a)
+        .def("SetUp", &TextureModality::SetUp)
 
         .def("ModelOcclusions", &TextureModality::ModelOcclusions)
         .def("MeasureOcclusions", &TextureModality::MeasureOcclusions)
+
+        .def_property("descriptor_type", &TextureModality::descriptor_type, &TextureModality::set_descriptor_type)
+        .def_property("focused_image_size", &TextureModality::focused_image_size, &TextureModality::set_focused_image_size)
+        .def_property("descriptor_distance_threshold", &TextureModality::descriptor_distance_threshold, &TextureModality::set_descriptor_distance_threshold)
+        .def_property("tukey_norm_constant", &TextureModality::tukey_norm_constant, &TextureModality::set_tukey_norm_constant)
+        .def_property("standard_deviations", &TextureModality::standard_deviations, &TextureModality::set_standard_deviations)
+        .def_property("max_keyframe_rotation_difference", &TextureModality::max_keyframe_rotation_difference, &TextureModality::set_max_keyframe_rotation_difference)
+        .def_property("max_keyframe_age", &TextureModality::max_keyframe_age, &TextureModality::set_max_keyframe_age)
+        .def_property("n_keyframes", &TextureModality::n_keyframes, &TextureModality::set_n_keyframes)
+
+        .def_property("orb_n_features", &TextureModality::orb_n_features, &TextureModality::set_orb_n_features)
+        .def_property("orb_scale_factor", &TextureModality::orb_scale_factor, &TextureModality::set_orb_scale_factor)
+        .def_property("orb_n_levels", &TextureModality::orb_n_levels, &TextureModality::set_orb_n_levels)
+        .def_property("brisk_threshold", &TextureModality::brisk_threshold, &TextureModality::set_brisk_threshold)
+        .def_property("brisk_octave", &TextureModality::brisk_octave, &TextureModality::set_brisk_octave)
+        .def_property("brisk_pattern_scale", &TextureModality::brisk_pattern_scale, &TextureModality::set_brisk_pattern_scale)
+        .def_property("daisy_radius", &TextureModality::daisy_radius, &TextureModality::set_daisy_radius)
+        .def_property("daisy_q_radius", &TextureModality::daisy_q_radius, &TextureModality::set_daisy_q_radius)
+        .def_property("daisy_q_theta", &TextureModality::daisy_q_theta, &TextureModality::set_daisy_q_theta)
+        .def_property("daisy_q_hist", &TextureModality::daisy_q_hist, &TextureModality::set_daisy_q_hist)
+        .def_property("freak_orientation_normalized", &TextureModality::freak_orientation_normalized, &TextureModality::set_freak_orientation_normalized)
+        .def_property("freak_scale_normalized", &TextureModality::freak_scale_normalized, &TextureModality::set_freak_scale_normalized)
+        .def_property("freak_pattern_scale", &TextureModality::freak_pattern_scale, &TextureModality::set_freak_pattern_scale)
+        .def_property("freak_n_octaves", &TextureModality::freak_n_octaves, &TextureModality::set_freak_n_octaves)
+        .def_property("sift_n_features", &TextureModality::sift_n_features, &TextureModality::set_sift_n_features)
+        .def_property("sift_n_octave_layers", &TextureModality::sift_n_octave_layers, &TextureModality::set_sift_n_octave_layers)
+        .def_property("sift_contrast_threshold", &TextureModality::sift_contrast_threshold, &TextureModality::set_sift_contrast_threshold)
+        .def_property("sift_edge_threshold", &TextureModality::sift_edge_threshold, &TextureModality::set_sift_edge_threshold)
+        .def_property("sift_sigma", &TextureModality::sift_sigma, &TextureModality::set_sift_sigma)
+
+        .def_property("measured_occlusion_radius", &TextureModality::measured_occlusion_radius, &TextureModality::set_measured_occlusion_radius)
+        .def_property("measured_occlusion_threshold", &TextureModality::measured_occlusion_threshold, &TextureModality::set_measured_occlusion_threshold)
+        .def_property("modeled_occlusion_radius", &TextureModality::modeled_occlusion_radius, &TextureModality::set_modeled_occlusion_radius)
+        .def_property("modeled_occlusion_threshold", &TextureModality::modeled_occlusion_threshold, &TextureModality::set_modeled_occlusion_threshold)
+
+
         ;
 
     // Optimizer
@@ -441,6 +527,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def_property("metafile_path", &Optimizer::metafile_path, &Optimizer::set_metafile_path)
         .def_property("tikhonov_parameter_rotation", &Optimizer::tikhonov_parameter_rotation, &Optimizer::set_tikhonov_parameter_rotation)
         .def_property("tikhonov_parameter_translation", &Optimizer::tikhonov_parameter_translation, &Optimizer::set_tikhonov_parameter_translation)
+        .def_property_readonly("root_link", &Optimizer::root_link_ptr)
         ;
 
     // Constants
