@@ -73,6 +73,7 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def_property_readonly("set_up", &Tracker::set_up)
         .def_property_readonly("optimizers", &Tracker::optimizer_ptrs)
         .def_property_readonly("modalities", &Tracker::modality_ptrs)
+        .def_property_readonly("color_histograms", &Tracker::color_histograms_ptrs)
         ;
 
     //--------------------------//
@@ -368,9 +369,12 @@ PYBIND11_MODULE(_pym3t_mod, m) {
     // Modality -> not constructible, just to enable automatic downcasting and binding of child classes
     py::class_<Modality, PyModality, std::shared_ptr<Modality>>(m, "Modality")
         .def("SetUp", &Modality::SetUp)
+        .def("StartModality", &Modality::StartModality)
         .def_property_readonly("gradient", &Modality::gradient)
         .def_property_readonly("hessian", &Modality::hessian)
         .def_property("name", &Modality::name, &Modality::set_name)
+        .def_property_readonly("body", &Modality::body_ptr)
+        .def_property_readonly("color_histograms", &Modality::color_histograms_ptr)
         ;
 
     // RegionModality
