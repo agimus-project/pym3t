@@ -1,17 +1,18 @@
 channels:
   - conda-forge
 dependencies:
-  - python=3.9
+  - python>=3.8
   - compilers
   - cmake
   - scikit-build
   - pyyaml
-  - opencv
+  - opencv==4.3.0
   - mesa-libgl-devel-cos7-x86_64 
   - mesa-dri-drivers-cos7-x86_64 
   - libxcb
   - glew
   - glfw
   - librealsense
-  - quaternion
   - eigen
+  - numpy
+  - quaternion
