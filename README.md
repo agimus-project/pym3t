@@ -33,6 +33,8 @@ cd pym3t
 python -m venv .venv
 source .venv/bin/activate
 pip install .
+# or if you want to run examples
+pip install .[examples]
 ```
 
 # Example scripts
