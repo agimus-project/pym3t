@@ -37,6 +37,12 @@ pip install .
 pip install .[examples]
 ```
 
+### Building with realsense camera
+First make sure that [librealsense](https://github.com/IntelRealSense/librealsense) is installed. It should be the case if you followed the conda-based installation.
+Then build with:
+
+`pip install . --config-settings="cmake.define.USE_REALSENSE=ON"`
+
 # Example scripts
 As example usage of the library, we provide several scripts: 
 * `run_image_dir_example.py`: single object tracking using color and depth images from filesystem;
