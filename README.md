@@ -26,7 +26,6 @@ pip install .
 > M3T relies on [GLFW](https://www.glfw.org/). Before building ensure it is installed.
 > For Ubuntu run `apt-get install libglfw3 libglfw3-dev`
 
-
 ```
 git clone https://github.com/agimus-project/pym3t
 cd pym3t
@@ -36,6 +35,11 @@ pip install .
 # or if you want to run examples
 pip install .[examples]
 ```
+
+### Building with realsense support
+First ensure that [librealsense](https://github.com/IntelRealSense/librealsense) is installed. It should be the case if you followed the conda-based installation. Then build with:
+
+`pip install . --config-settings="cmake.define.USE_REALSENSE=ON"`
 
 # Example scripts
 As example usage of the library, we provide several scripts: 
