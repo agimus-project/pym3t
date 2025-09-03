@@ -16,4 +16,5 @@ examples = [
     "numpy<2.0.0", # older numpy-quaternion releases are not compatible with numpy 2.0.0
     "numpy-quaternion>=2023.0.3",
     "opencv-python>=4.11.0.86",
+    "pyyaml"
 ]
