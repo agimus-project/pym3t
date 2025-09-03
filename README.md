@@ -61,17 +61,17 @@ Calibrated camera intrinsics in the formate described in config/cam_d435_640.yam
 
 Color only:   
 ``` bash
-python examples/run_image_dir_example.py --use_region -b obj_000014 -m <path/to/obj/dir> -i <path/to/image/dir> -c config/cam_d435_640.yaml --stop
+python examples/run_image_dir_example.py --use_region -b obj_000014 -m <path/to/obj/dir> -i <path/to/image/dir> -c config/cam_d435_640.yaml --stop_at_each_img
 ```
 
 Color + depth:   
 ``` bash
-python examples/run_image_dir_example.py --use_region --use_depth -b obj_000014 -m <path/to/obj/dir> -i <path/to/image/dir> -c config/cam_d435_640.yaml --stop
+python examples/run_image_dir_example.py --use_region --use_depth -b obj_000014 -m <path/to/obj/dir> -i <path/to/image/dir> -c config/cam_d435_640.yaml --stop_at_each_img
 ```
 
 Keyboard commands:
 - `q`: exit;
-- `any other key`: When running with **--stop** or **-s** argument, continue to next image.
+- `any other key`: When running with **--stop_at_each_img** or **-s** argument, continue to next image.
 
 ## Running with webcam
 To bypass camera calibration, a reasonable horizontal fov (50 - 70 degrees) can be assumed to get camera intrinsics
