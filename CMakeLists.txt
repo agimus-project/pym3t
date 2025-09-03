@@ -5,6 +5,7 @@ option(USE_AZURE_KINECT "Use Azure Kinect" OFF)
 option(USE_REALSENSE "Use RealSense D435" OFF)
 option(USE_GTEST "Use gtest" OFF)
 option(USE_XFEATURES2D "Use OpenCV xfeatures2d" OFF)
+option(USE_EGL "Use EGL instead of glfw" OFF)
 
 if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.27.0")
   cmake_policy(SET CMP0148 OLD) # required for current pybind11
