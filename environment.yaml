@@ -4,13 +4,14 @@ dependencies:
   - python>=3.8
   - compilers
   - cmake
+  - libxcrypt
   - scikit-build
   - pyyaml
   - opencv==4.3.0
   - mesa-libgl-devel-cos7-x86_64 
+  - mesa-libegl-devel-cos7-x86_64 
   - mesa-dri-drivers-cos7-x86_64 
   - libxcb
-  - glew
   - glfw
   - librealsense
   - eigen
