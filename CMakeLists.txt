@@ -26,12 +26,21 @@ FetchContent_Declare(
   pybind11
   GIT_REPOSITORY "https://github.com/pybind/pybind11"
   GIT_TAG "v2.11.1")
+# FetchContent_Declare(
+#   m3t
+#   GIT_REPOSITORY "https://github.com/agimus-project/3DObjectTracking"
+#   GIT_TAG "master"
+#   SOURCE_SUBDIR "M3T" 
+#   CMAKE_ARGS "-DUSE_AZURE_KINECT=${USE_AZURE_KINECT}" "-DUSE_REALSENSE=${USE_REALSENSE}" 
+#   "-DUSE_GTEST=${USE_GTEST}" "-DUSE_XFEATURES2D=${USE_XFEATURES2D}" "-DUSE_EGL=${USE_EGL}"
+# )
 FetchContent_Declare(
   m3t
-  GIT_REPOSITORY "https://github.com/agimus-project/3DObjectTracking"
-  GIT_TAG "master"
-  SOURCE_SUBDIR "M3T" CMAKE_ARGS "-DUSE_AZURE_KINECT=${USE_AZURE_KINECT}"
-  "-DUSE_REALSENSE=${USE_REALSENSE}" "-DUSE_GTEST=${USE_GTEST}" "-DUSE_XFEATURES2D=${USE_XFEATURES2D}")
+  SOURCE_DIR "/home/mfourmy/sandbox/Libs/3DObjectTracking/M3T" 
+  CMAKE_ARGS "-DUSE_AZURE_KINECT=${USE_AZURE_KINECT}" "-DUSE_REALSENSE=${USE_REALSENSE}" 
+  "-DUSE_GTEST=${USE_GTEST}" "-DUSE_XFEATURES2D=${USE_XFEATURES2D}" "-DUSE_EGL=${USE_EGL}"
+)
+
 FetchContent_MakeAvailable(pybind11 m3t)
 
 # Create library for the extensions to m3t
