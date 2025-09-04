@@ -154,8 +154,18 @@ PYBIND11_MODULE(_pym3t_mod, m) {
 
     //--------------------------//
 
-    // RendererGeometry
-    py::class_<RendererGeometry, std::shared_ptr<RendererGeometry>>(m, "RendererGeometry")
+    class PyRendererGeometry : public RendererGeometry {
+    public:
+        using RendererGeometry::RendererGeometry;  // Inherit constructors
+        
+        ~PyRendererGeometry() override {
+            pybind11::gil_scoped_release release;
+            // Base class destructor will be called automatically
+        }
+    };
+
+    // Modify your bindings to use the wrapper class
+    py::class_<RendererGeometry, PyRendererGeometry, std::shared_ptr<RendererGeometry>>(m, "RendererGeometry")
         .def(py::init<const std::string &>(), "name"_a)
         .def("SetUp", &RendererGeometry::SetUp)
         .def("AddBody", &RendererGeometry::AddBody)
@@ -163,6 +173,15 @@ PYBIND11_MODULE(_pym3t_mod, m) {
         .def("ClearBodies", &RendererGeometry::ClearBodies)
         .def_property_readonly("name", &RendererGeometry::name)
         ;
+    // // RendererGeometry
+    // py::class_<RendererGeometry, std::shared_ptr<RendererGeometry>>(m, "RendererGeometry")
+    //     .def(py::init<const std::string &>(), "name"_a)
+    //     .def("SetUp", &RendererGeometry::SetUp)
+    //     .def("AddBody", &RendererGeometry::AddBody)
+    //     .def("DeleteBody", &RendererGeometry::DeleteBody)
+    //     .def("ClearBodies", &RendererGeometry::ClearBodies)
+    //     .def_property_readonly("name", &RendererGeometry::name)
+    //     ;
 
     //--------------------------//
 
